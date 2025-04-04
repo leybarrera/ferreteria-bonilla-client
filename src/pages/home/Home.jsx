@@ -1,5 +1,5 @@
 import { FaPlus } from 'react-icons/fa'
-import { IoArrowForwardOutline } from 'react-icons/io5'
+import { IoArrowForwardOutline, IoQrCode } from 'react-icons/io5'
 import { TbMapPinFilled } from 'react-icons/tb'
 import { NavLink } from 'react-router-dom'
 
@@ -34,6 +34,14 @@ const Home = () => {
           <h3 className="font-light text-[12px] text-gray-500">
             El Empalme, Guayas
           </h3>
+        </div>
+
+        {/* Qr section */}
+        <div className="px-5 pt-5 flex flex-col w-full border-t border-gray-200 justify-center gap-2 items-center">
+          <IoQrCode size={30} />
+          <span className="text-center text-sm opacity-75">
+            Completa tu perfil para obtener tu QR de verificación
+          </span>
         </div>
       </section>
       {/* Ofertas */}

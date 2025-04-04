@@ -67,7 +67,7 @@ const Sidebar = ({ show, toggleShow }) => {
           </NavLink>
 
           <NavLink
-            to="/offers"
+            to="/applications"
             className={({ isActive }) =>
               `p-5 border-b border-gray-200 flex flex-row items-center gap-2 
         ${
@@ -77,7 +77,7 @@ const Sidebar = ({ show, toggleShow }) => {
             onClick={toggleShow}
           >
             <FaBriefcase size={16} />
-            Ofertas
+            Mis postulaciones
           </NavLink>
           <NavLink
             to="/messages"

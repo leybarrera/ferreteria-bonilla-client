@@ -1,3 +1,5 @@
+import { NavLink } from 'react-router-dom'
+
 const Inbox = ({ showInbox }) => {
   return (
     <div
@@ -57,6 +59,18 @@ const Inbox = ({ showInbox }) => {
           </div>
         </article>
       </section>
+
+      <div
+        className="absolute bottom-0 left-0 w-full h-[50px] flex flex-row items-center
+      justify-center bg-gray-200/30 border-t border-gray-200"
+      >
+        <NavLink
+          to={'/messages'}
+          className="text-[#FD6C01] font-bold hover:text-[#ff850b] transition-all duration-300"
+        >
+          Ver todos los mensajes
+        </NavLink>
+      </div>
     </div>
   )
 }

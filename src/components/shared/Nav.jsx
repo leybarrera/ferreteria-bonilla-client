@@ -70,7 +70,7 @@ const Nav = ({ toggleShow }) => {
 
         <div className="lg:flex-row lg:items-center gap-2 hidden lg:flex relative">
           <NavLink
-            to={'/offers'}
+            to={'/applications'}
             className="w-[40px] h-[40px] rounded-full bg-[#cb4d03] border border-gray-300 cursor-pointer flex justify-center items-center text-white hover:bg-[#ff850b] transition-all duration-300"
             type="button"
           >
@@ -117,7 +117,10 @@ const Nav = ({ toggleShow }) => {
           <Notifications showNotifications={showNotifications} />
 
           {/* Box Settingss */}
-          <Settings showSettings={showSettings} />
+          <Settings
+            showSettings={showSettings}
+            toggleShowSettings={toggleShowSettings}
+          />
         </div>
 
         <button

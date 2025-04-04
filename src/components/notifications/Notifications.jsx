@@ -1,4 +1,5 @@
 import { GoDotFill } from 'react-icons/go'
+import { NavLink } from 'react-router-dom'
 
 const Notifications = ({ showNotifications }) => {
   return (
@@ -103,6 +104,18 @@ const Notifications = ({ showNotifications }) => {
           </div>
         </article>
       </section>
+
+      <div
+        className="absolute bottom-0 left-0 w-full h-[50px] flex flex-row items-center
+      justify-center bg-gray-200/30 border-t border-gray-200"
+      >
+        <NavLink
+          to={'/notifications'}
+          className="text-[#FD6C01] font-bold hover:text-[#ff850b] transition-all duration-300"
+        >
+          Ver todas las Notificaciones
+        </NavLink>
+      </div>
     </div>
   )
 }
