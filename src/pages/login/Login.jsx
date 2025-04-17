@@ -1,15 +1,20 @@
 import { useState } from 'react'
 import { FaEye, FaEyeSlash } from 'react-icons/fa'
 import { MdEmail, MdLock } from 'react-icons/md'
-import { NavLink } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
 import { toast, Toaster } from 'sonner'
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google'
 import { jwtDecode } from 'jwt-decode'
 import { clientId } from '../../config/index.config'
 import { authApi } from '../../api/index.api'
 import { AxiosError } from 'axios'
+import { useDispatch } from 'react-redux'
+import { storageUtil } from '../../utils/index.utils'
+import { setInfo } from '../../redux/slices/user.slice'
 
 const Login = () => {
+  const navigate = useNavigate()
+  const dispatch = useDispatch()
   const [credentials, setCredentials] = useState({
     email: '',
     password: '',
@@ -41,7 +46,12 @@ const Login = () => {
       .loginWithCredentials(credentials)
       .then((res) => {
         const { user } = res.data
-        toast.success(`Bienvenido ${user.full_name}`)
+        dispatch(setInfo(user))
+        storageUtil.saveData('session', res.data)
+        toast.success(`Bienvenido ${user.fullName}`)
+        setTimeout(() => {
+          navigate('/')
+        }, 2500)
       })
       .catch((err) => {
         if (err instanceof AxiosError) {
@@ -59,7 +69,13 @@ const Login = () => {
       .loginWithGoogle(sub)
       .then((res) => {
         const { user } = res.data
-        toast.success(`Bienvenido ${user.full_name}`)
+        setInfo(user)
+        storageUtil.saveData('session', res.data)
+        toast.success(`Bienvenido ${user.fullName}`)
+
+        setTimeout(() => {
+          navigate('/')
+        }, 2500)
       })
       .catch((err) => {
         if (err instanceof AxiosError) {

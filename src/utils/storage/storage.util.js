@@ -9,7 +9,19 @@ const getData = (key) => {
   return dataParse
 }
 
+const updateData = (key, data) => {
+  const storage = getData(key)
+  const { token } = storage
+
+  const newStorage = {
+    user: data,
+    token: token,
+  }
+  saveData(key, newStorage)
+}
+
 export default {
   saveData,
   getData,
+  updateData,
 }

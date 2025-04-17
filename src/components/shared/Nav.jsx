@@ -11,8 +11,14 @@ import { TbMessageCircleFilled } from 'react-icons/tb'
 import { NavLink } from 'react-router-dom'
 import { Inbox, Notifications, Settings } from '../index.components'
 import { useState } from 'react'
+import { useSelector } from 'react-redux'
+import { useEffect } from 'react'
 
 const Nav = ({ toggleShow }) => {
+  const { messages, notifications } = useSelector((state) => state.app)
+  const [unreadMessages, setUnreadMessages] = useState(0)
+  const [unreadNotifications, setUnreadNotifications] = useState(0)
+
   const [currentBox, setCurrentBox] = useState(null)
   const [showInbox, setShowInbox] = useState(false)
   const [showNotifications, setShowNotifications] = useState(false)
@@ -42,6 +48,15 @@ const Nav = ({ toggleShow }) => {
     if (currentBox !== 'settings') setCurrentBox('settings')
     else setCurrentBox(null)
   }
+
+  useEffect(() => {
+    const messagesUnread = messages.filter((message) => !message.isRead)
+    const notificationsUnread = notifications.filter(
+      (notification) => !notification.isRead
+    )
+    setUnreadMessages(messagesUnread.length + 10)
+    setUnreadNotifications(notificationsUnread.length + 10)
+  }, [messages, notifications])
   return (
     <nav className="h-[50px] bg-[#fd6c01] flex justify-center lg:px-0 px-10">
       {/* General */}
@@ -79,20 +94,28 @@ const Nav = ({ toggleShow }) => {
           <button
             className={`w-[40px] h-[40px] rounded-full ${
               currentBox === 'msg' ? 'bg-[#ff850b]' : 'bg-[#cb4d03]'
-            }  border border-gray-300 cursor-pointer flex justify-center items-center text-white hover:bg-[#ff850b] transition-all duration-300`}
+            }  border border-gray-300 cursor-pointer flex justify-center items-center text-white hover:bg-[#ff850b] transition-all duration-300 relative`}
             type="button"
             onClick={toggleShowInbox}
           >
             <BiSolidMessageRoundedDots size={18} />
+
+            <span className="absolute w-[20px] h-[20px] text-[10px] rounded-full bg-[#CB112D] text-white flex justify-center items-center -top-1 -right-1 z-50 border border-red-800 font-bold">
+              {unreadMessages}
+            </span>
           </button>
           <button
             className={`w-[40px] h-[40px] rounded-full ${
               currentBox === 'noti' ? 'bg-[#ff850b]' : 'bg-[#cb4d03]'
-            }  border border-gray-300 cursor-pointer flex justify-center items-center text-white hover:bg-[#ff850b] transition-all duration-300`}
+            }  border border-gray-300 cursor-pointer flex justify-center items-center text-white hover:bg-[#ff850b] transition-all duration-300 relative`}
             type="button"
             onClick={toggleShowNotifications}
           >
             <IoIosNotifications size={18} />
+
+            <span className="absolute w-[20px] h-[20px] text-[10px] rounded-full bg-[#CB112D] text-white flex justify-center items-center -top-1 -right-1 z-50 border border-red-800 font-bold">
+              {unreadNotifications}
+            </span>
           </button>
 
           <button

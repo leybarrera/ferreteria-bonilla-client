@@ -8,6 +8,7 @@ import {
   Notifications,
   Settings,
   Profile,
+  Activation,
 } from './pages/index.pages'
 import HomeLayout from './layout/HomeLayout'
 import Dashboard from './pages/dashboard/Dashboard'
@@ -28,6 +29,7 @@ const AppRouter = () => {
         <Route path="/notifications" element={<Notifications />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/perfil/:id" element={<Profile />} />
+        <Route path="/activation" element={<Activation />} />
       </Route>
 
       <Route path="/dashboard" element={<AdminLayout />}>

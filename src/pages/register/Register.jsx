@@ -9,16 +9,21 @@ import { clientId } from '../../config/index.config'
 import { userApi } from '../../api/index.api'
 import { AxiosError } from 'axios'
 import { storageUtil } from '../../utils/index.utils'
+import { useDispatch } from 'react-redux'
+import { setInfo } from '../../redux/slices/user.slice'
+// import { storageUtil } from '../../utils/index.utils'
 
 const Register = () => {
+  const dispatch = useDispatch()
   const navigate = useNavigate()
+  const [isValid, setIsValid] = useState(false)
+  const [passworMatch, setPasswordMatch] = useState(false)
   const [user, setUser] = useState({
-    full_name: null,
+    fullName: null,
     email: null,
     password: null,
     phone: null,
     dni: null,
-    profile_picture: null,
   })
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
@@ -29,18 +34,47 @@ const Register = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target
-
     setUser((data) => ({
       ...data,
       [name]: value,
     }))
+
+    const credentials = Object.values(user).every((data) => data !== null)
+    setIsValid(credentials && passworMatch)
+  }
+
+  const handleConfirmPassword = (e) => {
+    const { value } = e.target
+    const isValid = value === user.password
+    console.log(isValid)
+    setPasswordMatch(isValid)
+    const credentials = Object.values(user).every((data) => data !== null)
+    setIsValid(credentials && isValid)
   }
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    const credentialsExists = Object.values(user).every((data) => data !== '')
+    const credentialsExists = Object.values(user).every((data) => data !== null)
     if (!credentialsExists) {
       toast.error('Todos los datos son obligatorios')
+    } else {
+      userApi
+        .register(user)
+        .then((res) => {
+          const { message, expirationTime } = res.data
+          toast.success(`${message}. Bienvenido.`)
+          setTimeout(() => {
+            navigate('/activation', {
+              state: {
+                email: user.email,
+                expirationTime,
+              },
+            })
+          }, 2500)
+        })
+        .catch((err) => {
+          console.log(err)
+        })
     }
   }
 
@@ -64,11 +98,10 @@ const Register = () => {
     userApi
       .registerWithGoogle(dataUser)
       .then((res) => {
-        toast.success(`${res.data.message}. Bienvenido.`)
-        storageUtil.saveData('user-session', {
-          'user-info': res.data.user,
-          token: res.data.token,
-        })
+        const { user } = res.data
+        toast.success(`${user.fullName}. Bienvenido.`)
+        storageUtil.saveData('session', res.data)
+        dispatch(setInfo(user))
         setTimeout(() => {
           navigate('/')
         }, 2500)
@@ -210,7 +243,7 @@ const Register = () => {
                   <input
                     type={showConfirmPassword ? 'text' : 'password'}
                     name="confirm-password"
-                    onChange={handleChange}
+                    onChange={handleConfirmPassword}
                     className="flex-1 h-full outline-none px-2"
                   />
                   <button
@@ -242,7 +275,8 @@ const Register = () => {
 
             <button
               type="submit"
-              className="w-full bg-[#fd6c01] text-lg uppercase font-bold text-white py-4 flex justify-center items-center rounded-lg hover:bg-[#cb4d03] transition-colors cursor-pointer"
+              className="w-full bg-[#fd6c01] text-lg uppercase font-bold text-white py-4 flex justify-center items-center rounded-lg hover:bg-[#cb4d03] transition-colors cursor-pointer disabled:bg-gray-300"
+              disabled={!isValid}
             >
               Registrarme
             </button>

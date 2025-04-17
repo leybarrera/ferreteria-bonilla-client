@@ -6,6 +6,15 @@ import Settings from './settings/Settings'
 import Chatbot from './chatbot/Chatbot'
 import AdminAside from './shared/AdminAside'
 import {
+  GeneralInfo,
+  CV,
+  SkillsTab,
+  EducationTab,
+  WorkExperienceTab,
+  LanguageTab,
+  ReferencesTab,
+} from './tabs/index.tabs'
+import {
   References,
   General,
   Education,
@@ -29,4 +38,12 @@ export {
   WorkExperience,
   Languages,
   AdminAside,
+  // Tabs
+  GeneralInfo,
+  CV,
+  SkillsTab,
+  EducationTab,
+  WorkExperienceTab,
+  LanguageTab,
+  ReferencesTab,
 }

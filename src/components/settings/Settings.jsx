@@ -37,7 +37,11 @@ const Settings = ({ showSettings, toggleShowSettings }) => {
 
       {/* Options */}
       <section className="px-3 flex flex-col mt-2">
-        <NavLink className="py-5 px-2 gap-2 flex flex-row items-center justify-between hover:bg-gray-200 rounded-lg transition-all duration-300">
+        <NavLink
+          className="py-5 px-2 gap-2 flex flex-row items-center justify-between hover:bg-gray-200 rounded-lg transition-all duration-300"
+          to={'/settings'}
+          onClick={toggleShowSettings}
+        >
           <RiSettings3Fill size={20} />
           <h3 className="flex-1 text-lg font-normal">Configuración</h3>
           <LuChevronRight size={20} />
