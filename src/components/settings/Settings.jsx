@@ -2,14 +2,16 @@ import { FaBook } from 'react-icons/fa'
 import { GoDotFill } from 'react-icons/go'
 import { LuChevronRight } from 'react-icons/lu'
 import { RiLogoutCircleFill, RiSettings3Fill } from 'react-icons/ri'
+import { useSelector } from 'react-redux'
 import { NavLink, useNavigate } from 'react-router-dom'
 
 const Settings = ({ showSettings, toggleShowSettings }) => {
+  const { info } = useSelector((state) => state.user)
   const navigate = useNavigate()
 
   const goToProfile = () => {
     toggleShowSettings()
-    navigate('/perfil/12345678')
+    navigate(`/perfil/${info.id}`)
   }
   return (
     <div

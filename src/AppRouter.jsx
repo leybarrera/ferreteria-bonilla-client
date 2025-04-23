@@ -9,6 +9,7 @@ import {
   Settings,
   Profile,
   Activation,
+  VerificationAccount,
 } from './pages/index.pages'
 import HomeLayout from './layout/HomeLayout'
 import Dashboard from './pages/dashboard/Dashboard'
@@ -30,6 +31,10 @@ const AppRouter = () => {
         <Route path="/settings" element={<Settings />} />
         <Route path="/perfil/:id" element={<Profile />} />
         <Route path="/activation" element={<Activation />} />
+        <Route
+          path="/verification-account/:id"
+          element={<VerificationAccount />}
+        />
       </Route>
 
       <Route path="/dashboard" element={<AdminLayout />}>

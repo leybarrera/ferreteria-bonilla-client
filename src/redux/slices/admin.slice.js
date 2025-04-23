@@ -1,6 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit'
 
 const initialState = {
+  token: null,
   info: {},
   users: [],
   employees: [],
@@ -13,7 +14,7 @@ export const admninSlice = createSlice({
   name: 'admin',
   initialState,
   reducers: {
-    setInfo: (state, action) => {
+    setInfoAdmin: (state, action) => {
       state.info = action.payload
     },
     setUsers: (state, action) => {
@@ -43,17 +44,22 @@ export const admninSlice = createSlice({
       state.jobOffers = []
       state.postulations = []
     },
+
+    setToken: (state, action) => {
+      state.token = action.payload
+    },
   },
 })
 
 export const {
   resetState,
-  setInfo,
+  setInfoAdmin,
   setBranches,
   setEmployees,
   setJobOffers,
   setPostulations,
   setUsers,
+  setToken,
 } = admninSlice.actions
 
 export default admninSlice.reducer

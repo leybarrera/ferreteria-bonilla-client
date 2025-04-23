@@ -1,11 +1,18 @@
+import { useEffect } from 'react'
 import { FaEdit, FaTrash } from 'react-icons/fa'
 import { IoSearch } from 'react-icons/io5'
 import { RiCloseLine } from 'react-icons/ri'
 import { NavLink } from 'react-router-dom'
 import Swal from 'sweetalert2'
+import { storageUtil } from '../../../utils/index.utils'
+import { employeeApi } from '../../../api/index.api'
+import { useState } from 'react'
+import { toast, Toaster } from 'sonner'
+import { AxiosError } from 'axios'
 
 const Employees = () => {
-  const deleteUser = () => {
+  const [employees, setEmployees] = useState([])
+  const deleteUser = (id) => {
     Swal.fire({
       title: '¿Estás seguro?',
       text: '¡No podrás revertir esto!',
@@ -15,8 +22,34 @@ const Employees = () => {
       cancelButtonColor: '#d33',
       confirmButtonText: 'Si, eliminar',
       cancelButtonText: 'Cancelar',
+    }).then((res) => {
+      if (res.isConfirmed) {
+        const { token } = storageUtil.getData('session')
+
+        employeeApi
+          .delete(token, id)
+          .then((res) => {
+            const { message } = res.data
+            toast.success(message)
+            setEmployees((prev) => prev.filter((emp) => emp.id !== id))
+          })
+          .catch((err) => {
+            if (err instanceof AxiosError) {
+              toast.error(err.response.data.message)
+            } else {
+              toast.error('Error desconocido. Intente más tarde.')
+            }
+          })
+      }
     })
   }
+
+  useEffect(() => {
+    const { token } = storageUtil.getData('session')
+    employeeApi.getAll(token).then((res) => {
+      setEmployees(res.data.employees)
+    })
+  }, [])
   return (
     <main className="w-full h-full flex lg:px-10 lg:py-10 py-20 md:px-5 px-2 flex-col">
       <h2 className="text-3xl font-bold">Empleados</h2>
@@ -36,62 +69,83 @@ const Employees = () => {
           </div>
         </div>
       </section>
-      {/* Tabla de sucursales */}
-      <section className="relative overflow-x-auto shadow-md sm:rounded-lg mt-5">
-        <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-          <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-            <tr>
-              <th scope="col" className="px-6 py-5">
-                Sucursal
-              </th>
-              <th scope="col" className="px-6 py-5">
-                Nombres
-              </th>
-              <th scope="col" className="px-6 py-5">
-                Cargo
-              </th>
-              <th scope="col" className="px-6 py-5">
-                Contratación
-              </th>
-              <th scope="col" className="px-6 py-5">
-                Despido
-              </th>
-              <th scope="col" className="px-6 py-5">
-                Estado
-              </th>
-              <th scope="col" className="px-6 py-5">
-                <span className="sr-only">Delete</span>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">
-              <th
-                scope="row"
-                className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-              >
-                Principal
-              </th>
-              <td className="px-6 py-4">Cristhian Rodríguez</td>
-              <td className="px-6 py-4">Gerente</td>
-              <td className="px-6 py-4">10/10/2022</td>
-              <td className="px-6 py-4">N/A</td>
-              <td className="px-6 py-4">Activo</td>
-              <td className="px-6 py-4 text-right flex flex-row gap-5 items-center">
-                <button
-                  className="cursor-pointer hover:text-red-500 transition-all duration-300"
-                  type="button"
-                  onClick={deleteUser}
-                  title="Eliminar"
+
+      {employees && employees.length > 0 ? (
+        <section className="relative overflow-x-auto shadow-md sm:rounded-lg mt-5">
+          <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+            <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+              <tr>
+                <th scope="col" className="px-6 py-5">
+                  Sucursal
+                </th>
+                <th scope="col" className="px-6 py-5">
+                  Nombres
+                </th>
+                <th scope="col" className="px-6 py-5">
+                  Cargo
+                </th>
+                <th scope="col" className="px-6 py-5">
+                  Contratación
+                </th>
+                <th scope="col" className="px-6 py-5">
+                  Despido
+                </th>
+                <th scope="col" className="px-6 py-5">
+                  Estado
+                </th>
+                <th scope="col" className="px-6 py-5">
+                  <span className="sr-only">Delete</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {employees.map((emp) => (
+                <tr
+                  className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600"
+                  key={emp.id}
                 >
-                  <FaTrash size={20} />
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </section>
+                  <th
+                    scope="row"
+                    className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                  >
+                    {emp.Branch.name}
+                  </th>
+                  <td className="px-6 py-4">{emp.User.fullName}</td>
+                  <td className="px-6 py-4">{emp.jobTitle}</td>
+                  <td className="px-6 py-4">{emp.hireDate.split('T')[0]}</td>
+                  <td className="px-6 py-4">
+                    {emp.endDate ? emp.endDate.split('T')[0] : 'En empleo'}
+                  </td>
+                  <td className="px-6 py-4">
+                    {emp.isActive ? 'Activo' : 'Inactivo'}
+                  </td>
+                  <td className="px-6 py-4 text-right flex flex-row gap-5 items-center">
+                    <button
+                      className="cursor-pointer hover:text-red-500 transition-all duration-300"
+                      type="button"
+                      onClick={() => deleteUser(emp.id)}
+                      title="Eliminar"
+                    >
+                      <FaTrash size={20} />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </section>
+      ) : (
+        <div className="mt-5 flex flex-col justify-center items-center gap-2">
+          <img src="/no-data.png" alt="No Data" className="w-[100px] mx-auto" />
+          <h2 className="text-2xl font-semibold text-gray-500">
+            No hay empleados registrados
+          </h2>
+        </div>
+      )}
+      {/* Tabla de sucursales */}
+
       {/* Modal */}
+      <Toaster richColors position="bottom-right" />
     </main>
   )
 }

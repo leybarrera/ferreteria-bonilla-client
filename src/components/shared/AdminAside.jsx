@@ -4,9 +4,11 @@ import { FaBuildingUser, FaUsersBetweenLines } from 'react-icons/fa6'
 import { IoIosStats } from 'react-icons/io'
 import { IoBusiness } from 'react-icons/io5'
 import { SiElectronbuilder } from 'react-icons/si'
+import { useSelector } from 'react-redux'
 import { NavLink } from 'react-router-dom'
 
 const AdminAside = ({ showMenu, toggleMenu }) => {
+  const { info } = useSelector((state) => state.admin)
   return (
     <>
       <aside
@@ -17,8 +19,8 @@ const AdminAside = ({ showMenu, toggleMenu }) => {
         {/* Secciones */}
         {/* Header Section */}
         <section className="flex flex-col border-b border-gray-500/20 p-5 items-center justify-center">
-          <h2 className="text-white font-bold text-lg">Cristhian Rodríguez</h2>
-          <h3 className="text-white font-bold text-sm">Administrador</h3>
+          <h2 className="text-white font-bold text-lg">{info?.fullName}</h2>
+          <h3 className="text-white font-bold text-sm">{info?.role}</h3>
         </section>
 
         {/* Menu Section */}

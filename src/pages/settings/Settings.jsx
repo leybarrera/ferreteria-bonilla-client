@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import {
+  AboutTab,
   CV,
   EducationTab,
   GeneralInfo,
@@ -8,6 +9,7 @@ import {
   SkillsTab,
   WorkExperienceTab,
 } from '../../components/index.components'
+import { useLocation } from 'react-router-dom'
 // import ProfileTab from '../../components/tabs/ProfileTab'
 // import CurriculumTab from '../../components/tabs/CurriculumTab'
 // import SkillsTab from '../../components/tabs/SkillsTab'
@@ -16,7 +18,11 @@ import {
 // import ReferencesTab from '../../components/tabs/ReferencesTab'
 
 const Settings = () => {
-  const [selectedTab, setSelectedTab] = useState('general')
+  const location = useLocation()
+
+  const { tab } = location.state || 'general'
+
+  const [selectedTab, setSelectedTab] = useState(tab || 'general')
 
   const handleTab = (tab) => setSelectedTab(tab)
 
@@ -34,6 +40,16 @@ const Settings = () => {
           onClick={() => handleTab('general')}
         >
           Información general
+        </button>
+        <button
+          className={`pr-10 py-5 border-b-2 font-bold cursor-pointer ${
+            selectedTab === 'about'
+              ? 'text-[#FD6C01] border-[#FD6C01]'
+              : 'text-[#78838B] border-b-transparent'
+          }`}
+          onClick={() => handleTab('about')}
+        >
+          Acerca de
         </button>
         <button
           className={`pr-10 py-5 border-b-2 font-bold cursor-pointer ${
@@ -99,6 +115,7 @@ const Settings = () => {
       </nav>
 
       {selectedTab === 'general' && <GeneralInfo />}
+      {selectedTab === 'about' && <AboutTab />}
       {selectedTab === 'cv' && <CV />}
       {selectedTab === 'habilidades' && <SkillsTab />}
       {selectedTab === 'educacion' && <EducationTab />}

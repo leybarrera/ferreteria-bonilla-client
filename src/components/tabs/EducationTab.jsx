@@ -17,19 +17,10 @@ const EducationTab = () => {
   const [educations, setEducations] = useState([])
 
   const getAllData = () => {
-    userEducationApi
-      .getByUserId(info.id)
-      .then((res) => {
-        const { userEducations } = res.data
-        setEducations(userEducations)
-      })
-      .catch((err) => {
-        if (err instanceof AxiosError) {
-          toast.error(err.response.data.message)
-        } else {
-          toast.error('Error desconocido. Intente más tarde.')
-        }
-      })
+    userEducationApi.getByUserId(info.id).then((res) => {
+      const { userEducations } = res.data
+      setEducations(userEducations)
+    })
   }
 
   const deleteEducation = (id) => {

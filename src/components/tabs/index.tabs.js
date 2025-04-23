@@ -5,6 +5,7 @@ import EducationTab from './EducationTab'
 import WorkExperienceTab from './WorkExperienceTab'
 import LanguageTab from './LanguageTab'
 import ReferencesTab from './ReferencesTab'
+import AboutTab from './About'
 export {
   GeneralInfo,
   CV,
@@ -13,4 +14,5 @@ export {
   WorkExperienceTab,
   LanguageTab,
   ReferencesTab,
+  AboutTab,
 }

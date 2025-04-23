@@ -1,3 +1,3 @@
 import BranchModal from './BranchModal'
-
-export { BranchModal }
+import QRComponent from './QRComponent'
+export { BranchModal, QRComponent }

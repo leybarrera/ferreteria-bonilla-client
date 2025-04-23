@@ -3,8 +3,12 @@ import { instance } from '../base.api'
 const model = 'job-offers'
 
 const jobOffersApi = {
-  getAll: () => {
-    return instance.get(`/${model}`)
+  getAll: (token) => {
+    return instance.get(`/${model}`, {
+      headers: {
+        'x-token': token,
+      },
+    })
   },
 }
 

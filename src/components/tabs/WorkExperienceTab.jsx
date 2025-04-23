@@ -63,19 +63,10 @@ const WorkExperienceTab = () => {
   }
 
   const getAllData = () => {
-    experienceApi
-      .getByUserId(info.id)
-      .then((res) => {
-        const { userExperiences } = res.data
-        setWorkExperiences(userExperiences)
-      })
-      .catch((err) => {
-        if (err instanceof AxiosError) {
-          toast.error(err.response.data.message)
-        } else {
-          toast.error('Error desconocido. Intente más tarde.')
-        }
-      })
+    experienceApi.getByUserId(info.id).then((res) => {
+      const { userExperiences } = res.data
+      setWorkExperiences(userExperiences)
+    })
   }
 
   const handleSave = () => {

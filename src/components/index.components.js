@@ -13,6 +13,7 @@ import {
   WorkExperienceTab,
   LanguageTab,
   ReferencesTab,
+  AboutTab,
 } from './tabs/index.tabs'
 import {
   References,
@@ -23,6 +24,8 @@ import {
   WorkExperience,
   Languages,
 } from './sections/index.sections'
+
+import { QRComponent } from './modal/index.modal'
 export {
   Chatbot,
   Inbox,
@@ -40,10 +43,12 @@ export {
   AdminAside,
   // Tabs
   GeneralInfo,
+  AboutTab,
   CV,
   SkillsTab,
   EducationTab,
   WorkExperienceTab,
   LanguageTab,
   ReferencesTab,
+  QRComponent,
 }

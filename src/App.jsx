@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import { Loading } from './pages/index.pages'
 import { setInfo } from './redux/slices/user.slice'
+import { setInfoAdmin, setToken } from './redux/slices/admin.slice'
 
 const App = () => {
   const [loading, setIsLoading] = useState(false)
@@ -22,8 +23,12 @@ const App = () => {
       setIsLoading(false)
     } else {
       const { user, token } = session
-      console.log(user)
-      dispatch(setInfo(user))
+      if (user.role === 'Administrador') {
+        dispatch(setInfoAdmin(user))
+        dispatch(setToken(token))
+      } else {
+        dispatch(setInfo(user))
+      }
 
       if (!token) {
         navigate('/inicio-sesion')

@@ -1,17 +1,140 @@
 import { useState } from 'react'
 import { RiCloseLine } from 'react-icons/ri'
 import { provinces } from '../../data/data'
+import { useEffect } from 'react'
+import { toast, Toaster } from 'sonner'
+import { branchApi } from '../../api/index.api'
+import { storageUtil } from '../../utils/index.utils'
+import { AxiosError } from 'axios'
+import Swal from 'sweetalert2'
 
-const BranchModal = ({ showModal, toggleModal }) => {
-  const [isMain, setIsMain] = useState(false)
+const BranchModal = ({ showModal, toggleModal, branchId }) => {
+  const initialState = {
+    name: '',
+    address: '',
+    phone: '',
+    province: '',
+    city: '',
+    email: '',
+    isMain: false,
+  }
+  const [branch, setBranch] = useState(initialState)
   const [province, setProvince] = useState('')
   const [cities, setCities] = useState([])
+
+  const handleClose = () => {
+    setBranch(initialState)
+    setProvince('')
+    setCities([])
+    toggleModal()
+  }
 
   const handleProvince = (e) => {
     const { value } = e.target
     setProvince(value)
     setCities(provinces[value])
+    setBranch((prev) => ({
+      ...prev,
+      province: value,
+    }))
   }
+
+  const handleChange = (e) => {
+    const { name, value } = e.target
+    setBranch((prev) => ({
+      ...prev,
+      [name]: value,
+    }))
+  }
+
+  const handleSubmit = (e) => {
+    const { token } = storageUtil.getData('session')
+    e.preventDefault()
+    if (Object.values(branch).some((data) => data === '')) {
+      toast.error('Todos los campos son obligatorios')
+      return
+    }
+
+    if (!branchId) {
+      branchApi
+        .save(token, branch)
+        .then((res) => {
+          const { message } = res.data
+          toast.success(message)
+          setBranch({
+            name: '',
+            address: '',
+            email: '',
+            phone: '',
+            province: '',
+            city: '',
+            isMain: false,
+          })
+          setProvince('')
+          setCities([])
+
+          setTimeout(() => {
+            toggleModal()
+          }, 2500)
+        })
+        .catch((err) => {
+          if (err instanceof AxiosError) {
+            toast.error(err.response.data.message)
+          } else {
+            toast.error('Error desconocido. Intente más tarde.')
+          }
+        })
+    } else {
+      branchApi
+        .update(token, branch, branchId)
+        .then((res) => {
+          const { message } = res.data
+          toast.success(message)
+          setTimeout(() => {
+            toggleModal()
+          }, 2500)
+        })
+        .catch((err) => {
+          if (err instanceof AxiosError) {
+            toast.error(err.response.data.message)
+          } else {
+            toast.error('Error desconocido. Intente más tarde.')
+          }
+        })
+    }
+  }
+
+  const handleMain = (e) => {
+    const { checked } = e.target
+    setBranch((prev) => ({
+      ...prev,
+      isMain: checked,
+    }))
+  }
+
+  useEffect(() => {
+    if (branchId) {
+      const { token } = storageUtil.getData('session')
+      branchApi
+        .getById(token, branchId)
+        .then((res) => {
+          const { branch } = res.data
+          setBranch(branch)
+          setProvince(branch.province)
+          setCities(provinces[branch.province])
+        })
+        .catch((err) => {
+          if (err instanceof AxiosError) {
+            toast.error(err.response.data.message)
+          } else {
+            toast.error('Error desconocido. Intente más tarde.')
+          }
+        })
+    } else {
+      setBranch(initialState)
+    }
+  }, [branchId])
+
   return (
     <div
       className={`${
@@ -23,7 +146,7 @@ const BranchModal = ({ showModal, toggleModal }) => {
           <h2 className="text-xl font-bold">Nueva Sucursal</h2>
           <button
             className="w-[30px] h-[30px] rounded-full bg-red-600 flex justify-center items-center cursor-pointer"
-            onClick={toggleModal}
+            onClick={handleClose}
           >
             <RiCloseLine color="white" />
           </button>
@@ -38,6 +161,9 @@ const BranchModal = ({ showModal, toggleModal }) => {
                 </label>
                 <input
                   type="text"
+                  name="name"
+                  value={branch.name}
+                  onChange={handleChange}
                   className="w-full bg-gray-100 rounded-lg h-[50px] border border-gray-300 px-5 outline-none"
                 />
               </div>
@@ -48,7 +174,10 @@ const BranchModal = ({ showModal, toggleModal }) => {
                     Teléfono
                   </label>
                   <input
-                    type="text"
+                    type="tel"
+                    name="phone"
+                    value={branch.phone}
+                    onChange={handleChange}
                     className="w-full bg-gray-100 rounded-lg h-[50px] border border-gray-300 px-5 outline-none"
                   />
                 </div>
@@ -57,7 +186,10 @@ const BranchModal = ({ showModal, toggleModal }) => {
                     Email
                   </label>
                   <input
-                    type="text"
+                    type="email"
+                    name="email"
+                    value={branch.email}
+                    onChange={handleChange}
                     className="w-full bg-gray-100 rounded-lg h-[50px] border border-gray-300 px-5 outline-none"
                   />
                 </div>
@@ -74,9 +206,16 @@ const BranchModal = ({ showModal, toggleModal }) => {
                     onChange={handleProvince}
                     className="outline-none h-[50px] bg-gray-100 rounded-lg px-2 border border-gray-300"
                   >
-                    <option selected>Elija la provincia</option>
+                    <option selected={branch.province === ''}>
+                      Elija la provincia
+                    </option>
                     {Object.keys(provinces).map((province) => (
-                      <option value={province}>{province}</option>
+                      <option
+                        value={province}
+                        selected={branch.province === province}
+                      >
+                        {province}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -88,11 +227,16 @@ const BranchModal = ({ showModal, toggleModal }) => {
                     disabled={province === ''}
                     id="city"
                     name="city"
+                    onChange={handleChange}
                     className="outline-none h-[50px] bg-gray-100 rounded-lg px-2 border border-gray-300 disabled:cursor-not-allowed"
                   >
-                    <option selected>Elija el cantón</option>
+                    <option selected={branch.city === ''}>
+                      Elija el cantón
+                    </option>
                     {cities.map((city) => (
-                      <option value={city}>{city}</option>
+                      <option value={city} selected={branch.city === city}>
+                        {city}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -104,6 +248,9 @@ const BranchModal = ({ showModal, toggleModal }) => {
                 </label>
                 <input
                   type="text"
+                  onChange={handleChange}
+                  value={branch.address}
+                  name="address"
                   className="w-full bg-gray-100 rounded-lg h-[50px] border border-gray-300 px-5 outline-none"
                 />
               </div>
@@ -111,9 +258,10 @@ const BranchModal = ({ showModal, toggleModal }) => {
               <label class="inline-flex items-center mb-5 cursor-pointer">
                 <input
                   type="checkbox"
-                  value=""
+                  value={branch.isMain}
                   class="sr-only peer"
-                  checked={isMain}
+                  checked={branch.isMain}
+                  onChange={handleMain}
                 />
                 <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:w-5 after:h-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600 dark:peer-checked:bg-blue-600"></div>
                 <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">
@@ -125,7 +273,10 @@ const BranchModal = ({ showModal, toggleModal }) => {
                 <button className="flex-1 h-[50px] bg-gray-600 text-white rounded-xl text-lg font-bold border border-gray-600 hover:bg-gray-700 transition-all duration-300 cursor-pointer">
                   Limpiar
                 </button>
-                <button className="flex-1 h-[50px] bg-blue-700 text-white rounded-xl text-lg font-bold border border-blue-600 hover:bg-blue-800 transition-all duration-300 cursor-pointer">
+                <button
+                  className="flex-1 h-[50px] bg-blue-700 text-white rounded-xl text-lg font-bold border border-blue-600 hover:bg-blue-800 transition-all duration-300 cursor-pointer"
+                  onClick={handleSubmit}
+                >
                   Guardar
                 </button>
               </div>
@@ -133,6 +284,7 @@ const BranchModal = ({ showModal, toggleModal }) => {
           </div>
         </div>
       </div>
+      <Toaster richColors position="bottom-right" />
     </div>
   )
 }

@@ -51,19 +51,10 @@ const ReferencesTab = () => {
   }
 
   const getAllData = () => {
-    referencesApi
-      .getByUserId(info.id)
-      .then((res) => {
-        const { userReferences } = res.data
-        setReferences(userReferences)
-      })
-      .catch((err) => {
-        if (err instanceof AxiosError) {
-          toast.error(err.response.data.message)
-        } else {
-          toast.error('Error desconocido. Intente más tarde.')
-        }
-      })
+    referencesApi.getByUserId(info.id).then((res) => {
+      const { userReferences } = res.data
+      setReferences(userReferences)
+    })
   }
 
   const deleteReference = (id) => {

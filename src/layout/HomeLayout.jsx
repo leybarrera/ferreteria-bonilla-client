@@ -11,7 +11,6 @@ const HomeLayout = () => {
       <main className="flex flex-col  bg-[#F4F2EE] relative">
         <Nav toggleShow={toggleShow} />
         <Outlet />
-        <Chatbot />
       </main>
     </>
   )

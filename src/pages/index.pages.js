@@ -7,6 +7,7 @@ import Settings from './settings/Settings'
 import Profile from './profile/Profile'
 import Loading from './loading/Loading'
 import Activation from './activation/Activation'
+import VerificationAccount from './verification-account/VerificationAccount'
 
 import Home from './home/Home'
 
@@ -21,4 +22,5 @@ export {
   Notifications,
   Settings,
   Profile,
+  VerificationAccount,
 }

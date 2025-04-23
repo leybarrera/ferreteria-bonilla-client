@@ -6,16 +6,61 @@ import { SiElectronbuilder } from 'react-icons/si'
 import { useNavigate } from 'react-router-dom'
 import CountUp from 'react-countup'
 import { useState } from 'react'
+import { useSelector } from 'react-redux'
+import { useEffect } from 'react'
+import {
+  branchApi,
+  employeeApi,
+  jobOffersApi,
+  postulationApi,
+  userApi,
+} from '../../api/index.api'
+import { storageUtil } from '../../utils/index.utils'
 const Dashboard = () => {
-  const [totalUsers, setTotalUsers] = useState(100)
-  const [totalBranches, setTotalBranches] = useState(5)
-  const [totalOffers, setTotalOffers] = useState(10)
-  const [totalApplications, setTotalApplications] = useState(10)
+  const { info } = useSelector((state) => state.admin)
+  const [users, setUsers] = useState([])
+  const [branches, setBranches] = useState([])
+  const [jobOffers, setJobOffers] = useState([])
+  const [postulations, setPostulations] = useState([])
+  const [employees, setEmployees] = useState([])
 
   const navigate = useNavigate()
   const goTo = (path) => {
     navigate(`/dashboard/${path}`)
   }
+
+  useEffect(() => {
+    const session = storageUtil.getData('session')
+    userApi
+      .getAllUsers(session.token)
+      .then((res) => {
+        const { users } = res.data
+        setUsers(users)
+      })
+      .catch((err) => {
+        console.log(err)
+      })
+
+    branchApi.getAll().then((res) => {
+      const { branches } = res.data
+      setBranches(branches)
+    })
+
+    jobOffersApi.getAll(session.token).then((res) => {
+      const { jobOffers } = res.data
+      setJobOffers(jobOffers)
+    })
+
+    postulationApi.getAll(session.token).then((res) => {
+      const { jobApplications } = res.data
+      setPostulations(jobApplications)
+    })
+
+    employeeApi.getAll(session.token).then((res) => {
+      const { employees } = res.data
+      setEmployees(employees)
+    })
+  }, [])
   return (
     <main className="w-full h-full flex lg:px-10 py-20 px-2">
       {/* Tarjetas */}
@@ -37,7 +82,7 @@ const Dashboard = () => {
           <CountUp
             className="text-8xl font-bold text-white"
             start={0}
-            end={totalBranches}
+            end={branches.length}
             duration={2}
             useEasing={true}
           />
@@ -61,7 +106,7 @@ const Dashboard = () => {
           <CountUp
             className="text-8xl font-bold text-white"
             start={0}
-            end={totalOffers}
+            end={jobOffers.length}
             duration={2}
             useEasing={true}
           />
@@ -87,7 +132,7 @@ const Dashboard = () => {
           <CountUp
             className="text-8xl font-bold text-white"
             start={0}
-            end={totalApplications}
+            end={postulations.length}
             duration={2}
             useEasing={true}
           />
@@ -109,7 +154,7 @@ const Dashboard = () => {
           <CountUp
             className="text-8xl font-bold text-white"
             start={0}
-            end={totalUsers}
+            end={users.length}
             duration={2}
             useEasing={true}
           />
@@ -133,7 +178,7 @@ const Dashboard = () => {
           <CountUp
             className="text-8xl font-bold text-white"
             start={0}
-            end={totalUsers}
+            end={employees.length}
             duration={2}
             useEasing={true}
           />

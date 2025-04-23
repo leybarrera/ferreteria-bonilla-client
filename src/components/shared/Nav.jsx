@@ -54,8 +54,8 @@ const Nav = ({ toggleShow }) => {
     const notificationsUnread = notifications.filter(
       (notification) => !notification.isRead
     )
-    setUnreadMessages(messagesUnread.length + 10)
-    setUnreadNotifications(notificationsUnread.length + 10)
+    setUnreadMessages(messagesUnread.length)
+    setUnreadNotifications(notificationsUnread.length)
   }, [messages, notifications])
   return (
     <nav className="h-[50px] bg-[#fd6c01] flex justify-center lg:px-0 px-10">
@@ -63,11 +63,13 @@ const Nav = ({ toggleShow }) => {
       <div className="lg:w-[1400px] w-full mx-auto flex flex-row items-center justify-between relative">
         {/* Left */}
         <div className="flex flex-row items-center lg:gap-3 gap-1">
-          <img
-            src={'/public/mascota-clean.png'}
-            className="w-[45px]"
-            alt="Logo Ferretería BOnilla"
-          />
+          <NavLink to={'/'}>
+            <img
+              src={'/public/mascota-clean.png'}
+              className="w-[45px]"
+              alt="Logo Ferretería BOnilla"
+            />
+          </NavLink>
 
           <div className="flex flex-row items-center justify-between lg:w-[350px] w-[210px] bg-white rounded-lg overflow-hidden">
             <input
@@ -100,9 +102,11 @@ const Nav = ({ toggleShow }) => {
           >
             <BiSolidMessageRoundedDots size={18} />
 
-            <span className="absolute w-[20px] h-[20px] text-[10px] rounded-full bg-[#CB112D] text-white flex justify-center items-center -top-1 -right-1 z-50 border border-red-800 font-bold">
-              {unreadMessages}
-            </span>
+            {unreadMessages > 0 && (
+              <span className="absolute w-[20px] h-[20px] text-[10px] rounded-full bg-[#CB112D] text-white flex justify-center items-center -top-1 -right-1 z-50 border border-red-800 font-bold">
+                {unreadMessages}
+              </span>
+            )}
           </button>
           <button
             className={`w-[40px] h-[40px] rounded-full ${
@@ -113,9 +117,11 @@ const Nav = ({ toggleShow }) => {
           >
             <IoIosNotifications size={18} />
 
-            <span className="absolute w-[20px] h-[20px] text-[10px] rounded-full bg-[#CB112D] text-white flex justify-center items-center -top-1 -right-1 z-50 border border-red-800 font-bold">
-              {unreadNotifications}
-            </span>
+            {unreadNotifications > 0 && (
+              <span className="absolute w-[20px] h-[20px] text-[10px] rounded-full bg-[#CB112D] text-white flex justify-center items-center -top-1 -right-1 z-50 border border-red-800 font-bold">
+                {unreadNotifications}
+              </span>
+            )}
           </button>
 
           <button

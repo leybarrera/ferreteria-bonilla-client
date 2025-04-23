@@ -1,6 +1,6 @@
 const Loading = () => {
   return (
-    <div className="absolute top-0 left-0 w-full h-full flex flex-col justify-center items-center gap-2">
+    <div className="absolute top-0 left-0 w-full h-screen flex flex-col justify-center items-center gap-2 z-50 overflow-hidden bg-white">
       <img
         src="/public/mascota-clean.png"
         alt="Mascota"

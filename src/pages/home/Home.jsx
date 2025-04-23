@@ -20,20 +20,26 @@ import {
   setOffers,
   setPostulations,
 } from '../../redux/slices/app.slice'
+import { QRComponent } from '../../components/index.components.js'
 import { useDispatch } from 'react-redux'
 
 const Home = () => {
+  const [showQR, setShowQR] = useState(false)
   const [allBranches, setAllBranches] = useState([])
   const dispatch = useDispatch()
   const [profileCompleted, setPorfileCompleted] = useState(false)
   const { info, offers } = useSelector((state) => state.user)
   const { branches } = useSelector((state) => state.app)
 
-  useEffect(() => {
-    toast.warning(
-      'Completa tu perfil para poder usar los servicios de la plataforma'
-    )
-  }, [profileCompleted])
+  const toggleShowQR = () => {
+    setShowQR((prev) => !prev)
+  }
+
+  // useEffect(() => {
+  //   toast.warning(
+  //     'Completa tu perfil para poder usar los servicios de la plataforma'
+  //   )
+  // }, [profileCompleted])
 
   useEffect(() => {
     const infoUserCompleted = Object.values(info).every((data) => data !== null)
@@ -109,13 +115,27 @@ const Home = () => {
         </div>
 
         {/* Qr section */}
-        <div className="px-5 pt-5 flex flex-col w-full border-t border-gray-200 justify-center gap-2 items-center">
-          <IoQrCode size={30} />
-          <span className="text-center text-sm opacity-75">
-            Completa tu perfil para obtener tu QR de verificación
-          </span>
-        </div>
+        {info?.isDataValidated ? (
+          <div className="px-5 pt-5 flex flex-col w-full border-t border-gray-200 justify-center gap-2 items-center">
+            <button onClick={toggleShowQR}>
+              <IoQrCode size={30} />
+            </button>
+            <span className="text-center text-sm opacity-75">
+              Escanea tu QR de verificación
+            </span>
+          </div>
+        ) : (
+          <div className="px-5 pt-5 flex flex-col w-full border-t border-gray-200 justify-center gap-2 items-center">
+            <button onClick={toggleShowQR}>
+              <IoQrCode size={30} />
+            </button>
+            <span className="text-center text-sm opacity-75">
+              Completa tu perfil para obtener tu QR de verificación
+            </span>
+          </div>
+        )}
       </section>
+
       {/* Ofertas */}
       <section className="flex-1 h-fit pb-5 flex flex-col gap-3">
         {offers && offers.length > 0 ? (
@@ -231,6 +251,8 @@ const Home = () => {
         closeButton
         duration={1000000}
       />
+
+      {showQR && <QRComponent toggleShowQR={toggleShowQR} />}
     </main>
   )
 }
