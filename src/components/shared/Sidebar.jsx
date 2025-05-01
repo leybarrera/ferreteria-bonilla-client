@@ -65,6 +65,19 @@ const Sidebar = ({ show, toggleShow }) => {
             <RiHome3Fill size={16} />
             Inicio
           </NavLink>
+          <NavLink
+            to="/branches"
+            className={({ isActive }) =>
+              `p-5 border-b border-gray-200 flex flex-row items-center gap-2 
+        ${
+          isActive ? 'text-[#fd6c01] bg-gray-100' : 'text-gray-700'
+        } hover:text-black`
+            }
+            onClick={toggleShow}
+          >
+            <FaBriefcase size={16} />
+            Sucursales
+          </NavLink>
 
           <NavLink
             to="/applications"

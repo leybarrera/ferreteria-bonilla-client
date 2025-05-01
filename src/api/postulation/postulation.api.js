@@ -14,6 +14,22 @@ const postulationApi = {
       },
     })
   },
+
+  applyJob: (token, data) => {
+    return instance.post(`/${model}`, data, {
+      headers: {
+        'x-token': token,
+      },
+    })
+  },
+
+  cancelApplyJob: (token, id) => {
+    return instance.delete(`/${model}/${id}`, {
+      headers: {
+        'x-token': token,
+      },
+    })
+  },
 }
 
 export default postulationApi

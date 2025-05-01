@@ -12,10 +12,13 @@
   "dependencies": {
     "@fontsource-variable/roboto": "^5.2.5",
     "@react-oauth/google": "^0.12.1",
+    "@react-pdf-viewer/core": "^3.12.0",
+    "@react-pdf-viewer/toolbar": "^3.12.0",
     "@reduxjs/toolkit": "^2.6.1",
     "@tailwindcss/vite": "^4.0.12",
     "axios": "^1.8.2",
     "d": "^1.0.2",
+    "date-fns": "4.1.0",
     "jwt-decode": "^4.0.0",
     "openai": "^4.86.2",
     "qrcode.react": "^4.2.0",

@@ -8,6 +8,7 @@ import Profile from './profile/Profile'
 import Loading from './loading/Loading'
 import Activation from './activation/Activation'
 import VerificationAccount from './verification-account/VerificationAccount'
+import BranchesPage from './branches/Branches'
 
 import Home from './home/Home'
 
@@ -23,4 +24,5 @@ export {
   Settings,
   Profile,
   VerificationAccount,
+  BranchesPage,
 }

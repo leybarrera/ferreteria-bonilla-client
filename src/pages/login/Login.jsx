@@ -76,7 +76,7 @@ const Login = () => {
       .loginWithGoogle(sub)
       .then((res) => {
         const { user } = res.data
-        setInfo(user)
+        dispatch(setInfo(user))
         storageUtil.saveData('session', res.data)
         toast.success(`Bienvenido ${user.fullName}`)
 

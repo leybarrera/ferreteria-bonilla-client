@@ -1,3 +1,3 @@
 import storageUtil from './storage/storage.util.js'
-
-export { storageUtil }
+import dateUtil from './date/date.util.js'
+export { storageUtil, dateUtil }

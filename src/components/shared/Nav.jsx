@@ -15,6 +15,7 @@ import { useSelector } from 'react-redux'
 import { useEffect } from 'react'
 
 const Nav = ({ toggleShow }) => {
+  const { info } = useSelector((state) => state.user)
   const { messages, notifications } = useSelector((state) => state.app)
   const [unreadMessages, setUnreadMessages] = useState(0)
   const [unreadNotifications, setUnreadNotifications] = useState(0)
@@ -130,9 +131,9 @@ const Nav = ({ toggleShow }) => {
             onClick={toggleShowSettings}
           >
             <img
-              src="/public/user.png"
+              src={info.profilePicture ? info.profilePicture : '/user.png'}
               alt="Foto de perfil"
-              className="absolute w-full h-full object-cover"
+              className="absolute w-full h-full object-cover rounded-full"
             />
 
             <div className="absolute w-[15px] h-[15px] rounded-full flex justify-center items-center right-0 -bottom-1 bg-[#cb4d03]">

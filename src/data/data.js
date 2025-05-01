@@ -640,3 +640,20 @@ export const proficiencies = [
   'Avanzado',
   'Experto',
 ]
+
+export const positions = [
+  'Asistente contable',
+  'Asistente de Bodega',
+  'Atención al Cliente',
+  'Bodeguero',
+  'Cajero',
+  'Chófer',
+  'Contador',
+  'Jefe de Bodega',
+  'Jefe de Recursos Humanos',
+  'Mensajero',
+  'Publicitario',
+  'Secretario Oficinista Marketing',
+  'Sistemas',
+  'Técnico en Maquinaria Agrícola',
+]

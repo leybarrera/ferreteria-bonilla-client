@@ -23,7 +23,7 @@ const VerificationAccount = () => {
       <div className="lg:max-w-[700px] w-full bg-white p-8 rounded-xl shadow-lg flex flex-col justify-center items-center">
         {/* Título Principal */}
         <h2 className="text-4xl font-bold text-[#fd6c01] text-center mb-5">
-          ¡Perfil Verificado con Éxito!
+          Información validada
         </h2>
 
         {/* Imagen de perfil */}

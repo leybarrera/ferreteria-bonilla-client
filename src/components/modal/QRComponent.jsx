@@ -8,7 +8,8 @@ import { useState } from 'react'
 import { useEffect } from 'react'
 import { userApi } from '../../api/index.api'
 const QRComponent = ({ toggleShowQR, UserId }) => {
-  const url = `${frontendUrl}/verification-account/${UserId}`
+  const { info } = useSelector((state) => state.user)
+  const url = `${frontendUrl}/verification-account/${info.id}`
 
   return (
     <div className="absolute top-0 left-0 w-full h-screen flex flex-col justify-center items-center bg-black/50">

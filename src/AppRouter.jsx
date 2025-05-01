@@ -10,6 +10,7 @@ import {
   Profile,
   Activation,
   VerificationAccount,
+  BranchesPage,
 } from './pages/index.pages'
 import HomeLayout from './layout/HomeLayout'
 import Dashboard from './pages/dashboard/Dashboard'
@@ -31,6 +32,9 @@ const AppRouter = () => {
         <Route path="/settings" element={<Settings />} />
         <Route path="/perfil/:id" element={<Profile />} />
         <Route path="/activation" element={<Activation />} />
+        <Route path="/branches" element={<BranchesPage />} />
+        <Route path="/branches/:id" element={<BranchesPage />} />
+
         <Route
           path="/verification-account/:id"
           element={<VerificationAccount />}

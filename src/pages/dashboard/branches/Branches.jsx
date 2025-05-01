@@ -11,9 +11,9 @@ import { toast, Toaster } from 'sonner'
 import { AxiosError } from 'axios'
 
 const Branches = () => {
-  const [showModal, setShowModal] = useState(false)
   const [branchId, setBranchId] = useState(null)
   const [branches, setBranches] = useState([])
+  const [showModal, setShowModal] = useState(false)
   const toggleModal = () => {
     setShowModal((prev) => !prev)
   }

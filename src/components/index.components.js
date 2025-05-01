@@ -25,7 +25,12 @@ import {
   Languages,
 } from './sections/index.sections'
 
-import { QRComponent } from './modal/index.modal'
+import {
+  QRComponent,
+  EmployeeModal,
+  OfferModal,
+  NewOfferModal,
+} from './modal/index.modal'
 export {
   Chatbot,
   Inbox,
@@ -51,4 +56,7 @@ export {
   LanguageTab,
   ReferencesTab,
   QRComponent,
+  EmployeeModal,
+  OfferModal,
+  NewOfferModal,
 }

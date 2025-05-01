@@ -151,7 +151,7 @@ const BranchModal = ({ showModal, toggleModal, branchId }) => {
             <RiCloseLine color="white" />
           </button>
         </header>
-        <div className="flex flex-row">
+        <div className="flex">
           {/* Formulario */}
           <div className="p-5 flex-1">
             <form>

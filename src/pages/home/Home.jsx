@@ -2,12 +2,12 @@ import { useEffect } from 'react'
 import { useState } from 'react'
 import { FaPlus } from 'react-icons/fa'
 import { IoArrowForwardOutline, IoQrCode } from 'react-icons/io5'
-import { TbMapPinFilled } from 'react-icons/tb'
 import { useSelector } from 'react-redux'
 import { NavLink } from 'react-router-dom'
 import { toast, Toaster } from 'sonner'
 import {
   branchApi,
+  interestApi,
   jobOffersApi,
   messageApi,
   notificationApi,
@@ -18,21 +18,88 @@ import {
   setMessages,
   setNotifications,
   setOffers,
-  setPostulations,
 } from '../../redux/slices/app.slice'
 import { QRComponent } from '../../components/index.components.js'
 import { useDispatch } from 'react-redux'
+import { dateUtil, storageUtil } from '../../utils/index.utils.js'
+import { AxiosError } from 'axios'
 
 const Home = () => {
   const [showQR, setShowQR] = useState(false)
-  const [allBranches, setAllBranches] = useState([])
+  const [jobOffers, setJobOffers] = useState([])
+  const [postulations, setPostulations] = useState([])
+  const [interests, setInterests] = useState([])
   const dispatch = useDispatch()
-  const [profileCompleted, setPorfileCompleted] = useState(false)
-  const { info, offers } = useSelector((state) => state.user)
+  const { info } = useSelector((state) => state.user)
   const { branches } = useSelector((state) => state.app)
 
   const toggleShowQR = () => {
     setShowQR((prev) => !prev)
+  }
+
+  const getPostulations = () => {
+    postulationApi.getByUserId(info.id).then((res) => {
+      const { jobApplications } = res.data
+      setPostulations(jobApplications)
+      dispatch(setPostulations(jobApplications))
+    })
+  }
+
+  const getInterests = async () => {
+    const { token } = storageUtil.getData('session')
+    interestApi
+      .getByUserId(token, info.id)
+      .then((res) => {
+        const { interests } = res.data
+        setInterests(interests)
+      })
+      .catch((err) => {
+        if (err instanceof AxiosError) {
+          toast.error(err.response.data.message)
+        } else {
+          toast.error('Error desconocido. Intente más tarde.')
+        }
+      })
+  }
+
+  const followBranch = (id) => {
+    const { token } = storageUtil.getData('session')
+    interestApi
+      .follow(token, info.id, id)
+      .then((res) => {
+        const { message } = res.data
+        toast.success(message)
+        getInterests()
+      })
+      .catch((err) => {
+        if (err instanceof AxiosError) {
+          toast.error(err.response.data.message)
+        } else {
+          toast.error('Error desconocido. Intente más tarde.')
+        }
+      })
+  }
+
+  const unFollowBranch = (id) => {
+    const interest = interests.find(
+      (interest) => interest.BranchId === id && interest.UserId === info.id
+    )
+
+    const { token } = storageUtil.getData('session')
+    interestApi
+      .unFollow(token, interest.id)
+      .then((res) => {
+        const { message } = res.data
+        toast.success(message)
+        getInterests()
+      })
+      .catch((err) => {
+        if (err instanceof AxiosError) {
+          toast.error(err.response.data.message)
+        } else {
+          toast.error('Error desconocido. Intente más tarde.')
+        }
+      })
   }
 
   // useEffect(() => {
@@ -41,9 +108,47 @@ const Home = () => {
   //   )
   // }, [profileCompleted])
 
+  const applyJob = (JobOfferId) => {
+    const { token } = storageUtil.getData('session')
+    postulationApi
+      .applyJob(token, {
+        UserId: info.id,
+        JobOfferId,
+      })
+      .then((res) => {
+        const { message } = res.data
+        toast.success(message)
+        getPostulations()
+      })
+      .catch((err) => {
+        if (err instanceof AxiosError) {
+          toast.error(err.response.data.message)
+        } else {
+          toast.error('Error desconocido. Intente más tarde.')
+        }
+      })
+  }
+
+  const cancelApplyJob = (id) => {
+    const { token } = storageUtil.getData('session')
+    postulationApi
+      .cancelApplyJob(token, id)
+      .then((res) => {
+        const { message } = res.data
+        toast.success(message)
+        getPostulations()
+      })
+      .catch((err) => {
+        if (err instanceof AxiosError) {
+          toast.error(err.response.data.message)
+        } else {
+          toast.error('Error desconocido. Intente más tarde.')
+        }
+      })
+  }
+
   useEffect(() => {
-    const infoUserCompleted = Object.values(info).every((data) => data !== null)
-    setPorfileCompleted(infoUserCompleted)
+    const { token } = storageUtil.getData('session')
 
     // Get sucursales
     branchApi
@@ -57,8 +162,9 @@ const Home = () => {
       })
 
     // Get Ofertas
-    jobOffersApi.getAll().then((res) => {
+    jobOffersApi.getAll(token).then((res) => {
       const { jobOffers } = res.data
+      setJobOffers(jobOffers)
       dispatch(setOffers(jobOffers))
     })
     // Get Mensajes
@@ -72,16 +178,15 @@ const Home = () => {
       dispatch(setNotifications(notifications))
     })
     // Get Postulaciones
+    getPostulations()
 
-    postulationApi.getByUserId(info.id).then((res) => {
-      const { postulations } = res.data
-      dispatch(setPostulations(postulations))
+    // Get Intereses
+    interestApi.getByUserId(token, info.id).then((res) => {
+      const { interests } = res.data
+      setInterests(interests)
     })
   }, [])
 
-  useEffect(() => {
-    console.log('Info:', info)
-  }, [])
   return (
     <main className="lg:w-[1400px] mx-auto w-full flex lg:flex-row flex-col py-10 lg:px-0 px-10 gap-5 h-full bg-[#F4F2EE]">
       {/* Info */}
@@ -95,7 +200,7 @@ const Home = () => {
           />
           {/* Imagen de perfil */}
           <img
-            src={info?.profilePicture || '/public/user.png'}
+            src={info?.profilePicture || '/user.png'}
             alt="Imagen de perfil del usuario"
             className="absolute lg:w-[72px] lg:h-[72px] md:w-[100px] md:h-[100px] h-[80px] w-[80px]  border-2 border-gray-400 rounded-full left-5 lg:-bottom-1/2 md:-bottom-10 -bottom-1/2"
           />
@@ -126,7 +231,7 @@ const Home = () => {
           </div>
         ) : (
           <div className="px-5 pt-5 flex flex-col w-full border-t border-gray-200 justify-center gap-2 items-center">
-            <button onClick={toggleShowQR}>
+            <button>
               <IoQrCode size={30} />
             </button>
             <span className="text-center text-sm opacity-75">
@@ -138,55 +243,78 @@ const Home = () => {
 
       {/* Ofertas */}
       <section className="flex-1 h-fit pb-5 flex flex-col gap-3">
-        {offers && offers.length > 0 ? (
-          offers.map((offer) => (
-            <article
-              className="flex flex-col gap-2 bg-white py-5 rounded-lg border border-gray-200 shadow shadow-gray-300"
-              key={offer.id}
-            >
-              {/* Header */}
-              <header className="flex flex-row gap-3 px-5">
-                <img
-                  src="/public/user.png"
-                  alt="Foto de la empresa"
-                  className="w-[60px] h-[60px] rounded-full border-2 border-gray-400"
-                />
-                <div className="flex flex-col">
-                  <h2 className="text-lg text-[#000000E6] font-semibold">
-                    Nombre de la empresa
-                  </h2>
+        {jobOffers && jobOffers.length > 0 ? (
+          jobOffers.map((offer) => {
+            const isPostulated = postulations.some(
+              (postulation) => postulation.JobOfferId === offer.id
+            )
+            const postulationFound = postulations.find(
+              (postulation) =>
+                postulation.JobOfferId === offer.id &&
+                postulation.UserId === info.id
+            )
+
+            return (
+              <article
+                className="flex flex-col gap-2 bg-white py-5 rounded-lg border border-gray-200 shadow shadow-gray-300"
+                key={offer.id}
+              >
+                {/* Header */}
+                <header className="flex flex-row gap-3 px-5">
+                  <div className="w-[50px] h-[50px]  rounded-full border-2 border-gray-400 bg-[#F4F2EE] flex justify-center items-center">
+                    <img
+                      src="/mascota-clean.png"
+                      alt="Foto de la empresa"
+                      className="w-[40px] h-[40px] "
+                    />
+                  </div>
+                  <div className="flex flex-col flex-1">
+                    <h2 className="text-lg text-[#000000E6] font-semibold">
+                      {offer.Branch.name}
+                    </h2>
+                    <h3 className="text-xs text-[#00000099]">
+                      {offer.Branch.province}, {offer.Branch.city}
+                    </h3>
+                    <h5 className="text-xs font-light text-[#00000099]">
+                      {dateUtil.formatedDate(offer.createdAt)}
+                    </h5>
+                  </div>
+                </header>
+
+                <main className="px-5 mt-2">
+                  <p className="text-justify text-[15px] text-black font-medium mb-3">
+                    {offer.description}
+                  </p>
+
                   <h3 className="text-xs text-[#00000099]">
-                    La Maná, Cotopaxi
+                    {offer.type}, {offer.contractType}
                   </h3>
-                  <h5 className="text-xs font-light text-[#00000099]">
-                    5 días
-                  </h5>
-                </div>
-              </header>
+                  <h3 className="text-xs text-[#00000099] mt-2">
+                    $ {offer.salary}
+                  </h3>
 
-              <main className="px-5 mt-2">
-                <p className="text-justify text-[16px] text-[#000000E6]">
-                  Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                  Placeat voluptatem eum, vel minus quibusdam sapiente
-                  accusantium dolores dolorem dignissimos quas beatae aperiam
-                  earum? Dolor ex quae quidem, at aperiam, quo dolorum
-                  blanditiis hic, enim atque ipsa inventore! Quod hic voluptate
-                  expedita repudiandae officia laborum maiores minus velit rem,
-                  magnam mollitia, voluptatum voluptates ipsa? Repellat, vero
-                  voluptates doloribus nesciunt at totam alias corrupti.
-                  Recusandae nobis odio repellendus est fuga adipisci unde,
-                  repellat, praesentium minus enim alias quas voluptatem
-                  voluptates architecto maxime in labore. Neque earum inventore
-                  dignissimos facilis architecto, nostrum dolorem ad, maxime,
-                  corrupti labore deleniti quae mollitia voluptatum ea ratione.
-                </p>
-
-                <button className="w-full py-2 flex flex-row items-center justify-center gap-2 mt-3 bg-[#ff850b] text-white text-lg font-bold rounded-xl cursor-pointer hover:bg-[#fd6c01] transition-colors duration-300">
-                  Aplicar
-                </button>
-              </main>
-            </article>
-          ))
+                  {isPostulated ? (
+                    <button
+                      className="w-full py-2 flex flex-row items-center justify-center gap-2 mt-3 bg-gray-800 text-white text-lg font-bold rounded-xl cursor-pointer hover:bg-gray-700 transition-colors duration-300"
+                      onClick={() => cancelApplyJob(postulationFound.id)}
+                    >
+                      Cancelar aplicación
+                    </button>
+                  ) : (
+                    <button
+                      className="w-full py-2 flex flex-row items-center justify-center gap-2 mt-3 bg-[#ff850b] text-white text-lg font-bold rounded-xl cursor-pointer hover:bg-[#fd6c01] transition-colors duration-300 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                      onClick={() => applyJob(offer.id)}
+                      disabled={!info?.isDataValidated}
+                    >
+                      {info?.isDataValidated
+                        ? 'Aplicar'
+                        : 'Completa tu perfil para aplicar'}
+                    </button>
+                  )}
+                </main>
+              </article>
+            )
+          })
         ) : (
           <div className="w-full lg:h-[200px] h-[500px] flex flex-col justify-center items-center bg-[#fff9ec] border border-[#fff9ec] rounded-lg">
             <h2 className="text-2xl font-bold text-[#ff850b]">
@@ -205,29 +333,55 @@ const Home = () => {
 
         <div className="flex flex-col gap-5">
           {branches && branches.length > 0 ? (
-            branches.map((branch) => (
-              <article className="flex flex-row gap-3" key={branch.id}>
-                {/* Foto de la sucursal */}
-                <img
-                  src=""
-                  alt=""
-                  className="w-[50px] h-[50px] rounded-full bg-red-300"
-                />
+            branches.map((branch) => {
+              const isFollowing = interests.some(
+                (inter) => inter.BranchId === branch.id
+              )
+              return (
+                <article className="flex flex-row gap-3" key={branch.id}>
+                  {/* Foto de la sucursal */}
+                  <img
+                    src=""
+                    alt=""
+                    className="w-[50px] h-[50px] rounded-full bg-red-300"
+                  />
 
-                <div className="flex flex-col">
-                  <h3 className="text-[14px] font-bold">{branch.name}</h3>
-                  <h5 className="text-xs font-light text-gray-500">
-                    {branch.city}, {branch.province}
-                  </h5>
-                  <button className="w-full flex flex-row gap-1 items-center justify-center py-1 border border-[#000000BF] rounded-full mt-2 ">
-                    <FaPlus size={14} />
-                    <span className="font-bold text-[#000000BF] text-[16px]">
-                      Seguir
-                    </span>
-                  </button>
-                </div>
-              </article>
-            ))
+                  <div className="flex flex-col">
+                    <NavLink
+                      to={`/branches/${branch.id}`}
+                      className="cursor-pointer text-[14px] font-bold"
+                    >
+                      {branch.name}
+                    </NavLink>
+                    <h5 className="text-xs font-light text-gray-500">
+                      {branch.city}, {branch.province}
+                    </h5>
+
+                    {isFollowing ? (
+                      <button
+                        className="w-full flex flex-row gap-1 items-center justify-center py-1 border border-red-500 rounded-full mt-2 cursor-pointer hover:bg-red-500/10 px-5 bg-red-500/20"
+                        onClick={() => unFollowBranch(branch.id)}
+                      >
+                        <FaPlus size={14} color="red" />
+                        <span className="font-bold text-red-600 text-[16px]">
+                          Dejar de seguir
+                        </span>
+                      </button>
+                    ) : (
+                      <button
+                        className="w-full flex flex-row gap-1 items-center justify-center py-1 border border-black rounded-full mt-2 cursor-pointer hover:bg-black/20 px-5 bg-black/10"
+                        onClick={() => followBranch(branch.id)}
+                      >
+                        <FaPlus size={14} />
+                        <span className="font-bold text-[#000000BF] text-[16px]">
+                          Seguir
+                        </span>
+                      </button>
+                    )}
+                  </div>
+                </article>
+              )
+            })
           ) : (
             <div className="w-full px-5 py-10 flex justify-center items-center">
               <h2 className="text-[16px] text-[#000000BF] font-semibold">
@@ -236,7 +390,10 @@ const Home = () => {
             </div>
           )}
           {branches && branches.length > 0 && (
-            <NavLink to={'/'} className="flex flex-row items-center gap-2 ">
+            <NavLink
+              to={'/branches'}
+              className="flex flex-row items-center gap-2 "
+            >
               <span className="text-[16px] text-[#000000BF] hover:text-gray-900 transition-all duration-300">
                 Ver todas las sucursales
               </span>

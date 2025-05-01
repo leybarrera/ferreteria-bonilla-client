@@ -9,9 +9,14 @@ import { employeeApi } from '../../../api/index.api'
 import { useState } from 'react'
 import { toast, Toaster } from 'sonner'
 import { AxiosError } from 'axios'
+import { EmployeeModal } from '../../../components/index.components'
 
 const Employees = () => {
   const [employees, setEmployees] = useState([])
+  const [showModal, setShowModal] = useState(false)
+  const toggleModal = () => {
+    setShowModal((prev) => !prev)
+  }
   const deleteUser = (id) => {
     Swal.fire({
       title: '¿Estás seguro?',
@@ -68,6 +73,14 @@ const Employees = () => {
             <IoSearch size={25} color="#d1d5dc" />
           </div>
         </div>
+
+        <button
+          className="bg-[#fd6c01] text-white px-5 py-2 rounded-lg font-bold cursor-pointer hover:bg-[#cb4d03] transition-all duration-300"
+          type="button"
+          onClick={toggleModal}
+        >
+          Nuevo
+        </button>
       </section>
 
       {employees && employees.length > 0 ? (
@@ -146,6 +159,7 @@ const Employees = () => {
 
       {/* Modal */}
       <Toaster richColors position="bottom-right" />
+      <EmployeeModal showModal={showModal} toggleModal={toggleModal} />
     </main>
   )
 }
