@@ -30,6 +30,7 @@ import {
   EmployeeModal,
   OfferModal,
   NewOfferModal,
+  ConversationModal,
 } from './modal/index.modal'
 export {
   Chatbot,
@@ -59,4 +60,5 @@ export {
   EmployeeModal,
   OfferModal,
   NewOfferModal,
+  ConversationModal,
 }

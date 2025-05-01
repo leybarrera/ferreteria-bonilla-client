@@ -27,6 +27,8 @@ import { AxiosError } from 'axios'
 const Home = () => {
   const [showQR, setShowQR] = useState(false)
   const [jobOffers, setJobOffers] = useState([])
+  const [messagesArr, setMessagesArr] = useState([])
+
   const [postulations, setPostulations] = useState([])
   const [interests, setInterests] = useState([])
   const dispatch = useDispatch()
@@ -78,6 +80,38 @@ const Home = () => {
           toast.error('Error desconocido. Intente más tarde.')
         }
       })
+  }
+
+  const groupMessagesByUser = (messages, currentUserId) => {
+    const grouped = {}
+
+    messages.forEach((msg) => {
+      const isIncoming = msg.ReceiverId === currentUserId
+      const otherUser =
+        msg.SenderId === currentUserId ? msg.Receiver : msg.Sender
+
+      if (!grouped[otherUser.id]) {
+        grouped[otherUser.id] = {
+          user: otherUser,
+          lastMessage: msg,
+          unreadCount: 0,
+        }
+      }
+
+      // Contar si es un mensaje entrante no leído
+      if (isIncoming && !msg.isRead) {
+        grouped[otherUser.id].unreadCount += 1
+      }
+
+      // Actualizar último mensaje si es más reciente
+      const existingTime = new Date(grouped[otherUser.id].lastMessage.senderAt)
+      const newTime = new Date(msg.senderAt)
+      if (newTime > existingTime) {
+        grouped[otherUser.id].lastMessage = msg
+      }
+    })
+
+    return Object.values(grouped)
   }
 
   const unFollowBranch = (id) => {
@@ -170,7 +204,9 @@ const Home = () => {
     // Get Mensajes
     messageApi.getMyMessages(info.id).then((res) => {
       const { conversations } = res.data
-      dispatch(setMessages(conversations))
+      const grouped = groupMessagesByUser(conversations, info.id)
+      setMessagesArr(grouped)
+      dispatch(setMessages(grouped))
     })
     // Get notificaciones
     notificationApi.getAllByUserId(info.id).then((res) => {

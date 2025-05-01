@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { FaEdit, FaTrash } from 'react-icons/fa'
 import { IoSearch } from 'react-icons/io5'
-import { RiCloseLine } from 'react-icons/ri'
+import { RiCloseLine, RiMessage2Fill } from 'react-icons/ri'
 import { NavLink } from 'react-router-dom'
 import Swal from 'sweetalert2'
 import { storageUtil } from '../../../utils/index.utils'
@@ -11,9 +11,17 @@ import { frontendUrl } from '../../../config/index.config'
 import { useSelector } from 'react-redux'
 import { toast, Toaster } from 'sonner'
 import { AxiosError } from 'axios'
+import { ConversationModal } from '../../../components/index.components'
 
 const Users = () => {
   const { info } = useSelector((state) => state.admin)
+  const [showConversation, setShowConversation] = useState(false)
+  const [receiverId, setReceiverId] = useState(null)
+  const handleConversation = (receiverId) => {
+    setReceiverId(receiverId)
+    toggleConversation()
+  }
+  const toggleConversation = () => setShowConversation(!showConversation)
   const [users, setUsers] = useState([])
   const deleteUser = (id) => {
     Swal.fire({
@@ -121,6 +129,9 @@ const Users = () => {
                   Validado
                 </th>
                 <th scope="col" className="px-6 py-5">
+                  Mensajes
+                </th>
+                <th scope="col" className="px-6 py-5">
                   <span className="sr-only">Delete</span>
                 </th>
                 <th scope="col" className="px-6 py-5">
@@ -155,6 +166,14 @@ const Users = () => {
                       />
                       <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:w-5 after:h-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600 dark:peer-checked:bg-blue-600"></div>
                     </label>
+                  </td>
+                  <td className="px-6 py-4 text-right flex flex-row gap-5 items-center ">
+                    <button
+                      className="hover:text-gray-300 transition-all duration-300 cursor-pointer"
+                      onClick={() => handleConversation(user.id)}
+                    >
+                      <RiMessage2Fill size={20} />
+                    </button>
                   </td>
 
                   <td className="px-6 py-4">
@@ -192,6 +211,12 @@ const Users = () => {
       )}
 
       <Toaster richColors position="bottom-right" />
+
+      <ConversationModal
+        showConversation={showConversation}
+        toggleConversation={toggleConversation}
+        ReceiverId={receiverId}
+      />
     </main>
   )
 }

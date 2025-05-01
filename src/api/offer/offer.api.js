@@ -33,6 +33,14 @@ const jobOffersApi = {
       },
     })
   },
+
+  geById: (token, id) => {
+    return instance.get(`/${model}/${id}`, {
+      headers: {
+        'x-token': token,
+      },
+    })
+  },
 }
 
 export default jobOffersApi

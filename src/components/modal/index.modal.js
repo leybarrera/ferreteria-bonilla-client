@@ -3,4 +3,12 @@ import QRComponent from './QRComponent'
 import EmployeeModal from './EmployeeModal'
 import OfferModal from './OfferModal'
 import NewOfferModal from './NewOfferModal'
-export { BranchModal, QRComponent, EmployeeModal, OfferModal, NewOfferModal }
+import ConversationModal from './ConversationModal'
+export {
+  BranchModal,
+  ConversationModal,
+  QRComponent,
+  EmployeeModal,
+  OfferModal,
+  NewOfferModal,
+}

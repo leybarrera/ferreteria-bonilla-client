@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { GoDotFill } from 'react-icons/go'
 import { useSelector } from 'react-redux'
-import { NavLink } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
 import { notificationApi } from '../../api/index.api'
 import { useState } from 'react'
 import { dateUtil, storageUtil } from '../../utils/index.utils'
@@ -9,25 +9,36 @@ import { setNotifications } from '../../redux/slices/app.slice'
 import { useDispatch } from 'react-redux'
 
 const Notifications = ({ showNotifications }) => {
+  const navigate = useNavigate()
   const [notificationsArr, setNotificationsArr] = useState([])
   const { info } = useSelector((state) => state.user)
   const dispatch = useDispatch()
 
-  const markReadNotification = (id) => {
+  const markReadNotification = (id, type, relationId) => {
     const { token } = storageUtil.getData('session')
-    notificationApi.markAsRead(id, token).then((res) => {
-      console.log(res.data)
-      setNotificationsArr((prev) =>
-        prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
-      )
-      dispatch(
-        setNotifications(
-          notificationsArr.map((n) =>
-            n.id === id ? { ...n, isRead: true } : n
+    notificationApi
+      .markAsRead(id, token)
+      .then((res) => {
+        console.log(res.data)
+        setNotificationsArr((prev) =>
+          prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
+        )
+        dispatch(
+          setNotifications(
+            notificationsArr.map((n) =>
+              n.id === id ? { ...n, isRead: true } : n
+            )
           )
         )
-      )
-    })
+      })
+      .catch((err) => {
+        console.log(err)
+      })
+      .finally(() => {
+        if (type === 'Offer') {
+          navigate(`/offers/${relationId}`)
+        }
+      })
   }
 
   useEffect(() => {
@@ -54,7 +65,13 @@ const Notifications = ({ showNotifications }) => {
             <article
               className="px-5 py-3 rounded-lg flex flex-row gap-2 items-center hover:bg-gray-50 cursor-pointer transition-all duration-300"
               key={notification.id}
-              onClick={() => markReadNotification(notification.id)}
+              onClick={() =>
+                markReadNotification(
+                  notification.id,
+                  notification.notificationType,
+                  notification.relationId
+                )
+              }
             >
               {/* Foto de perfil */}
               <img

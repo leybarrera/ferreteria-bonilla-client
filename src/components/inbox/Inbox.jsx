@@ -1,8 +1,54 @@
+import { useEffect } from 'react'
 import { useSelector } from 'react-redux'
 import { NavLink } from 'react-router-dom'
+import { messageApi } from '../../api/index.api'
+import { useState } from 'react'
+import { dateUtil } from '../../utils/index.utils'
 
 const Inbox = ({ showInbox }) => {
-  const { messages } = useSelector((state) => state.app)
+  const { info } = useSelector((state) => state.user)
+  const [messagesArr, setMessagesArr] = useState([])
+
+  const groupMessagesByUser = (messages, currentUserId) => {
+    const grouped = {}
+
+    messages.forEach((msg) => {
+      const isIncoming = msg.ReceiverId === currentUserId
+      const otherUser =
+        msg.SenderId === currentUserId ? msg.Receiver : msg.Sender
+
+      if (!grouped[otherUser.id]) {
+        grouped[otherUser.id] = {
+          user: otherUser,
+          lastMessage: msg,
+          unreadCount: 0,
+        }
+      }
+
+      // Contar si es un mensaje entrante no leído
+      if (isIncoming && !msg.isRead) {
+        grouped[otherUser.id].unreadCount += 1
+      }
+
+      // Actualizar último mensaje si es más reciente
+      const existingTime = new Date(grouped[otherUser.id].lastMessage.senderAt)
+      const newTime = new Date(msg.senderAt)
+      if (newTime > existingTime) {
+        grouped[otherUser.id].lastMessage = msg
+      }
+    })
+
+    return Object.values(grouped)
+  }
+
+  useEffect(() => {
+    messageApi.getMyMessages(info.id).then((res) => {
+      const { conversations } = res.data
+      const grouped = groupMessagesByUser(conversations, info.id)
+      console.log(grouped)
+      setMessagesArr(grouped)
+    })
+  }, [])
 
   return (
     <div
@@ -17,31 +63,39 @@ const Inbox = ({ showInbox }) => {
 
       {/* Section Messages */}
       <section className="flex flex-col px-2 gap-2 flex-1">
-        {messages && messages.length > 0 ? (
-          messages.map((message) => (
+        {messagesArr && messagesArr.length > 0 ? (
+          messagesArr.map((message) => (
             <article
-              className="px-5 py-3 rounded-lg flex flex-row gap-2 items-center"
+              className="px-5 py-3 rounded-lg flex flex-row gap-2 items-center hover:bg-gray-200 cursor-pointer transition-all duration-300"
               key={message.id}
             >
               {/* Foto de perfil */}
               <img
-                src="/public/user.png"
+                src={
+                  message.user.profilePicture
+                    ? message.user.profilePicture
+                    : '/user.png'
+                }
                 alt="Foto de perfil del usuario"
                 className="w-[56px] h-[56px] rounded-full"
               />
 
               {/* Nombre mensaje */}
 
-              <div className="flex-1 flex-col max-w-[200px]">
-                <h3 className="text-sm font-bold">Cristhian Rodríguez</h3>
+              <div className="flex-1 flex-col max-w-[220px] min-w-[220px]">
+                <h3 className="text-sm font-bold">{message.user.fullName}</h3>
                 <h5 className="text-xs truncate w-full overflow-hidden whitespace-nowrap">
-                  Lorem ipsum dolor sit, amet consectetur adipisicing elit.
-                  Provident, adipisci.
+                  {message.lastMessage.text}
                 </h5>
+                <span className="text-xs font-bold">
+                  {dateUtil.formatedDate(message.lastMessage.senderAt)}
+                </span>
               </div>
 
-              <div className="w-full flex h-full flex-row items-center justify-center ">
-                <span className="text-xs font-bold">1 min</span>
+              <div className="flex-1 flex justify-center items-center">
+                <span className="text-xs font-bold text-[#FD6C01] bg-white rounded-full w-[30px] h-[30px] flex justify-center items-center">
+                  {message.unreadCount}
+                </span>
               </div>
             </article>
           ))
@@ -51,7 +105,7 @@ const Inbox = ({ showInbox }) => {
           </div>
         )}
       </section>
-      {messages && messages.length > 0 && (
+      {messagesArr && messagesArr.length > 0 && (
         <div
           className="absolute bottom-0 left-0 w-full h-[50px] flex flex-row items-center
       justify-center bg-gray-200/30 border-t border-gray-200"

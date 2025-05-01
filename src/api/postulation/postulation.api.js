@@ -15,6 +15,14 @@ const postulationApi = {
     })
   },
 
+  getById: (token, id) => {
+    return instance.get(`/${model}/${id}`, {
+      headers: {
+        'x-token': token,
+      },
+    })
+  },
+
   applyJob: (token, data) => {
     return instance.post(`/${model}`, data, {
       headers: {

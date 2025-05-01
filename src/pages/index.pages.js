@@ -9,7 +9,7 @@ import Loading from './loading/Loading'
 import Activation from './activation/Activation'
 import VerificationAccount from './verification-account/VerificationAccount'
 import BranchesPage from './branches/Branches'
-
+import JobOffers from './offers/JobOffers'
 import Home from './home/Home'
 
 export {
@@ -25,4 +25,5 @@ export {
   Profile,
   VerificationAccount,
   BranchesPage,
+  JobOffers,
 }

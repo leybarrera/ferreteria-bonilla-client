@@ -11,6 +11,7 @@ import {
   Activation,
   VerificationAccount,
   BranchesPage,
+  JobOffers,
 } from './pages/index.pages'
 import HomeLayout from './layout/HomeLayout'
 import Dashboard from './pages/dashboard/Dashboard'
@@ -34,6 +35,8 @@ const AppRouter = () => {
         <Route path="/activation" element={<Activation />} />
         <Route path="/branches" element={<BranchesPage />} />
         <Route path="/branches/:id" element={<BranchesPage />} />
+        <Route path="/offers" element={<JobOffers />} />
+        <Route path="/offers/:id" element={<JobOffers />} />
 
         <Route
           path="/verification-account/:id"
