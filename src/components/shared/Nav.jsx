@@ -51,11 +51,9 @@ const Nav = ({ toggleShow }) => {
   }
 
   useEffect(() => {
-    const messagesUnread = messages.filter((message) => !message.isRead)
     const notificationsUnread = notifications.filter(
       (notification) => !notification.isRead
     )
-    setUnreadMessages(messagesUnread.length)
     setUnreadNotifications(notificationsUnread.length)
   }, [messages, notifications])
   return (
@@ -103,9 +101,9 @@ const Nav = ({ toggleShow }) => {
           >
             <BiSolidMessageRoundedDots size={18} />
 
-            {unreadMessages > 0 && (
+            {messages.unreadMessages > 0 && (
               <span className="absolute w-[20px] h-[20px] text-[10px] rounded-full bg-[#CB112D] text-white flex justify-center items-center -top-1 -right-1 z-50 border border-red-800 font-bold">
-                {unreadMessages}
+                {messages.unreadMessages}
               </span>
             )}
           </button>

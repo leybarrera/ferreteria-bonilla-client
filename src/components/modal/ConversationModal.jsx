@@ -4,6 +4,7 @@ import { RiCloseFill, RiRefreshFill, RiRefreshLine } from 'react-icons/ri'
 import { useSelector } from 'react-redux'
 import { messageApi } from '../../api/index.api'
 import { storageUtil } from '../../utils/index.utils'
+import { useRef } from 'react'
 
 const ConversationModal = ({
   showConversation,
@@ -12,12 +13,33 @@ const ConversationModal = ({
 }) => {
   const { info } = useSelector((state) => state.admin)
   const [conversation, setConversation] = useState([])
+  const messagesEndRef = useRef(null)
+
   const [text, setText] = useState('')
 
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }
+
   const handleChange = (e) => {
-    const { name, value } = e.target
+    const { value } = e.target
     setText(value)
   }
+
+  const getConversation = () => {
+    const { token } = storageUtil.getData('session')
+    messageApi
+      .getConversation(token, info.id, ReceiverId)
+      .then((res) => {
+        const { conversations } = res.data
+        setConversation(conversations)
+      })
+      .catch((err) => {
+        console.log(err)
+      })
+  }
+
+  const reloadMessages = () => getConversation()
 
   const handleKeyDown = (e) => {
     const { token } = storageUtil.getData('session')
@@ -43,17 +65,12 @@ const ConversationModal = ({
   }
 
   useEffect(() => {
+    scrollToBottom()
+  }, [conversation])
+
+  useEffect(() => {
     // OBTENER MENSAJES
-    const { token } = storageUtil.getData('session')
-    messageApi
-      .getConversation(token, info.id, ReceiverId)
-      .then((res) => {
-        const { conversations } = res.data
-        setConversation(conversations)
-      })
-      .catch((err) => {
-        console.log(err)
-      })
+    getConversation()
   }, [showConversation, ReceiverId])
 
   return (
@@ -80,7 +97,7 @@ const ConversationModal = ({
           <div className="flex flex-row items-center gap-2">
             <button
               className="text-white hover:text-gray-200 transition-all duration-300 cursor-pointer"
-              // onClick={toggleConversation}
+              onClick={reloadMessages}
             >
               <RiRefreshLine size={25} />
             </button>
@@ -111,19 +128,12 @@ const ConversationModal = ({
                   className="w-[56px] h-[56px] rounded-full"
                 />
                 <div className="w-[450px] h-fit pl-5 pr-2 py-3 bg-gray-200 rounded-t-xl rounded-tr-xl rounded-br-xl">
-                  <span className="text-sm">
-                    Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                    Porro nulla nemo, numquam vitae, laudantium ipsam laborum
-                    itaque nam quidem dicta iusto? Qui voluptas animi distinctio
-                    recusandae obcaecati expedita facilis maiores ex totam
-                    officiis! At dolor mollitia consequatur ipsum quibusdam
-                    corrupti facere magni, veniam delectus officiis
-                    exercitationem iure vitae id soluta.
-                  </span>
+                  <span className="text-sm">{msg.text}</span>
                 </div>
               </div>
             )
           })}
+          <div ref={messagesEndRef} />
         </main>
 
         {/* Input */}

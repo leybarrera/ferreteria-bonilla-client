@@ -28,7 +28,6 @@ const AppRouter = () => {
       <Route path="/" element={<HomeLayout />}>
         <Route index element={<Home />} />
         <Route path="/applications" element={<Applications />} />
-        <Route path="/messages" element={<Messages />} />
         <Route path="/notifications" element={<Notifications />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/perfil/:id" element={<Profile />} />
@@ -37,6 +36,8 @@ const AppRouter = () => {
         <Route path="/branches/:id" element={<BranchesPage />} />
         <Route path="/offers" element={<JobOffers />} />
         <Route path="/offers/:id" element={<JobOffers />} />
+        <Route path="/messages" element={<Messages />} />
+        <Route path="/messages/:senderId/:receiverId" element={<Messages />} />
 
         <Route
           path="/verification-account/:id"

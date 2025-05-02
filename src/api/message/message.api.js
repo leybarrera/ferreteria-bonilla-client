@@ -25,6 +25,20 @@ const messageApi = {
       },
     })
   },
+
+  markAsRead: (token, senderId, receiverId) => {
+    return instance.put(
+      `/${model}/conversation?SenderId=${senderId}&ReceiverId=${receiverId}`,
+      {
+        isRead: true,
+      },
+      {
+        headers: {
+          'x-token': token,
+        },
+      }
+    )
+  },
 }
 
 export default messageApi

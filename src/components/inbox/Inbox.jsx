@@ -66,7 +66,9 @@ const Inbox = ({ showInbox }) => {
         {messagesArr && messagesArr.length > 0 ? (
           messagesArr.map((message) => (
             <article
-              className="px-5 py-3 rounded-lg flex flex-row gap-2 items-center hover:bg-gray-200 cursor-pointer transition-all duration-300"
+              className={`px-5 py-3 rounded-lg flex flex-row gap-2 items-center hover:bg-gray-200 cursor-pointer transition-all duration-300 ${
+                message.unreadCount > 0 ? 'bg-gray-200' : ''
+              }`}
               key={message.id}
             >
               {/* Foto de perfil */}
@@ -91,12 +93,13 @@ const Inbox = ({ showInbox }) => {
                   {dateUtil.formatedDate(message.lastMessage.senderAt)}
                 </span>
               </div>
-
-              <div className="flex-1 flex justify-center items-center">
-                <span className="text-xs font-bold text-[#FD6C01] bg-white rounded-full w-[30px] h-[30px] flex justify-center items-center">
-                  {message.unreadCount}
-                </span>
-              </div>
+              {message.unreadCount > 0 && (
+                <div className="flex-1 flex justify-center items-center">
+                  <span className="text-xs font-bold text-[#FD6C01] bg-white rounded-full w-[30px] h-[30px] flex justify-center items-center">
+                    {message.unreadCount}
+                  </span>
+                </div>
+              )}
             </article>
           ))
         ) : (
