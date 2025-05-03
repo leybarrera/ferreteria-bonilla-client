@@ -17,7 +17,7 @@ import {
 } from '../../api/index.api'
 import { storageUtil } from '../../utils/index.utils'
 const Dashboard = () => {
-  const { info } = useSelector((state) => state.admin)
+  const { info } = useSelector((state) => state.user)
   const [users, setUsers] = useState([])
   const [branches, setBranches] = useState([])
   const [jobOffers, setJobOffers] = useState([])
@@ -65,29 +65,33 @@ const Dashboard = () => {
     <main className="w-full h-full flex lg:px-10 py-20 px-2">
       {/* Tarjetas */}
       <section className="flex flex-row gap-10 justify-evenly flex-wrap">
-        <article
-          className="lg:w-[400px] h-[300px] w-[90%]  rounded-xl border border-gray-200 bg-[#ffa233] flex flex-col justify-center items-center px-5 hover:scale-110 transition-all duration-500 cursor-pointer hover:bg-[#ff850b] relative"
-          onClick={() => goTo('sucursales')}
-        >
-          <IoIosStats
-            className="absolute top-3 left-3"
-            size={30}
-            color="white"
-          />
-          <IoBusiness
-            className="absolute top-3 right-3"
-            size={30}
-            color="white"
-          />
-          <CountUp
-            className="text-8xl font-bold text-white"
-            start={0}
-            end={branches.length}
-            duration={2}
-            useEasing={true}
-          />
-          <h2 className="text-4xl font-bold text-gray-200 mt-5">Sucursales</h2>
-        </article>
+        {info.role === 'Administrador' && (
+          <article
+            className="lg:w-[400px] h-[300px] w-[90%]  rounded-xl border border-gray-200 bg-[#ffa233] flex flex-col justify-center items-center px-5 hover:scale-110 transition-all duration-500 cursor-pointer hover:bg-[#ff850b] relative"
+            onClick={() => goTo('sucursales')}
+          >
+            <IoIosStats
+              className="absolute top-3 left-3"
+              size={30}
+              color="white"
+            />
+            <IoBusiness
+              className="absolute top-3 right-3"
+              size={30}
+              color="white"
+            />
+            <CountUp
+              className="text-8xl font-bold text-white"
+              start={0}
+              end={branches.length}
+              duration={2}
+              useEasing={true}
+            />
+            <h2 className="text-4xl font-bold text-gray-200 mt-5">
+              Sucursales
+            </h2>
+          </article>
+        )}
 
         <article
           className="lg:w-[400px] h-[300px] w-[90%] rounded-xl border border-gray-200 bg-[#00b809] flex flex-col justify-center items-center px-5 hover:scale-110 transition-all duration-500 cursor-pointer hover:bg-[#008b07] relative"
@@ -161,29 +165,31 @@ const Dashboard = () => {
           <h2 className="text-4xl font-bold text-gray-200 mt-5">Usuarios</h2>
         </article>
 
-        <article
-          className="lg:w-[400px] h-[300px] w-[90%] rounded-xl border border-gray-200 bg-[#00b809] flex flex-col justify-center items-center px-5 hover:scale-110 transition-all duration-500 cursor-pointer hover:bg-[#008b07] relative"
-          onClick={() => goTo('empleados')}
-        >
-          <IoIosStats
-            className="absolute top-3 left-3"
-            size={30}
-            color="white"
-          />
-          <FaUsersBetweenLines
-            className="absolute top-3 right-3"
-            size={30}
-            color="white"
-          />
-          <CountUp
-            className="text-8xl font-bold text-white"
-            start={0}
-            end={employees.length}
-            duration={2}
-            useEasing={true}
-          />
-          <h2 className="text-4xl font-bold text-gray-200 mt-5">Empleados</h2>
-        </article>
+        {info.role === 'Administrador' && (
+          <article
+            className="lg:w-[400px] h-[300px] w-[90%] rounded-xl border border-gray-200 bg-[#00b809] flex flex-col justify-center items-center px-5 hover:scale-110 transition-all duration-500 cursor-pointer hover:bg-[#008b07] relative"
+            onClick={() => goTo('empleados')}
+          >
+            <IoIosStats
+              className="absolute top-3 left-3"
+              size={30}
+              color="white"
+            />
+            <FaUsersBetweenLines
+              className="absolute top-3 right-3"
+              size={30}
+              color="white"
+            />
+            <CountUp
+              className="text-8xl font-bold text-white"
+              start={0}
+              end={employees.length}
+              duration={2}
+              useEasing={true}
+            />
+            <h2 className="text-4xl font-bold text-gray-200 mt-5">Empleados</h2>
+          </article>
+        )}
       </section>
     </main>
   )

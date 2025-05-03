@@ -16,10 +16,10 @@ const Sidebar = ({ show, toggleShow }) => {
   const [user, setUser] = useState(null)
 
   useEffect(() => {
-    const data = storageUtil.getData('user-session')
+    const data = storageUtil.getData('session')
     if (!data) return
-    const { 'user-info': dataUser } = data
-    setUser(dataUser)
+    const { user } = data
+    setUser(user)
   }, [])
 
   return (

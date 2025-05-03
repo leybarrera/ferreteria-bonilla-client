@@ -91,7 +91,7 @@ const GeneralInfo = () => {
   return (
     <main className="w-[800px] py-5 flex flex-col lg:px-0 ">
       {/* Imagen de perfil */}
-      <div className="w-[150px] h-[150px] rounded-full border-4 border-[#fd6c01] relative overf">
+      <div className="w-[150px] h-[150px] rounded-full border-4 border-[#fd6c01] relative">
         <img
           src={imageUri || info?.profilePicture || '/user.png'}
           alt="Imagen de perfil del usuario"

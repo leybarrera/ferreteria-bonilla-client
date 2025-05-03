@@ -3,12 +3,13 @@ import { FaUsers } from 'react-icons/fa'
 import { FaBuildingUser, FaUsersBetweenLines } from 'react-icons/fa6'
 import { IoIosStats } from 'react-icons/io'
 import { IoBusiness } from 'react-icons/io5'
+import { RiUserSettingsFill } from 'react-icons/ri'
 import { SiElectronbuilder } from 'react-icons/si'
 import { useSelector } from 'react-redux'
 import { NavLink } from 'react-router-dom'
 
-const AdminAside = ({ showMenu, toggleMenu }) => {
-  const { info } = useSelector((state) => state.admin)
+const Aside = ({ showMenu, toggleMenu }) => {
+  const { info } = useSelector((state) => state.user)
   return (
     <>
       <aside
@@ -37,17 +38,19 @@ const AdminAside = ({ showMenu, toggleMenu }) => {
             <IoIosStats size={20} color="white" />
             <span className="text-white font-bold text-lg">General</span>
           </NavLink>
-          <NavLink
-            to={'/dashboard/sucursales'}
-            className={({ isActive }) =>
-              isActive
-                ? `px-8 py-5 flex items-center gap-2 border-b border-gray-500/20  text-white bg-gray-500/10 transition-all duration-300`
-                : `px-8 py-5 text-gray-500 flex items-center gap-2 border-b border-gray-500/20  hover:text-white hover:bg-gray-500/10 transition-all duration-300`
-            }
-          >
-            <IoBusiness size={20} color="white" />
-            <span className="text-white font-bold text-lg">Sucursales</span>
-          </NavLink>
+          {info.role === 'Administrador' && (
+            <NavLink
+              to={'/dashboard/sucursales'}
+              className={({ isActive }) =>
+                isActive
+                  ? `px-8 py-5 flex items-center gap-2 border-b border-gray-500/20  text-white bg-gray-500/10 transition-all duration-300`
+                  : `px-8 py-5 text-gray-500 flex items-center gap-2 border-b border-gray-500/20  hover:text-white hover:bg-gray-500/10 transition-all duration-300`
+              }
+            >
+              <IoBusiness size={20} color="white" />
+              <span className="text-white font-bold text-lg">Sucursales</span>
+            </NavLink>
+          )}
 
           <NavLink
             to={'/dashboard/ofertas'}
@@ -87,16 +90,30 @@ const AdminAside = ({ showMenu, toggleMenu }) => {
             <span className="text-white font-bold text-lg">Usuarios</span>
           </NavLink>
 
+          {info.role === 'Administrador' && (
+            <NavLink
+              to={'/dashboard/empleados'}
+              className={({ isActive }) =>
+                isActive
+                  ? `px-8 py-5 flex items-center gap-2 border-b border-gray-500/20  text-white bg-gray-500/10 transition-all duration-300`
+                  : `px-8 py-5 text-gray-500 flex items-center gap-2 border-b border-gray-500/20  hover:text-white hover:bg-gray-500/10 transition-all duration-300`
+              }
+            >
+              <FaUsersBetweenLines size={20} color="white" />
+              <span className="text-white font-bold text-lg">Empleados</span>
+            </NavLink>
+          )}
+
           <NavLink
-            to={'/dashboard/empleados'}
+            to={'/dashboard/configuracion'}
             className={({ isActive }) =>
               isActive
                 ? `px-8 py-5 flex items-center gap-2 border-b border-gray-500/20  text-white bg-gray-500/10 transition-all duration-300`
                 : `px-8 py-5 text-gray-500 flex items-center gap-2 border-b border-gray-500/20  hover:text-white hover:bg-gray-500/10 transition-all duration-300`
             }
           >
-            <FaUsersBetweenLines size={20} color="white" />
-            <span className="text-white font-bold text-lg">Empleados</span>
+            <RiUserSettingsFill size={20} color="white" />
+            <span className="text-white font-bold text-lg">Configuración</span>
           </NavLink>
 
           <NavLink
@@ -122,4 +139,4 @@ const AdminAside = ({ showMenu, toggleMenu }) => {
   )
 }
 
-export default AdminAside
+export default Aside

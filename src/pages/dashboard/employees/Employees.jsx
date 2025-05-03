@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { FaEdit, FaTrash } from 'react-icons/fa'
+import { FaEdit, FaTrash, FaUserEdit } from 'react-icons/fa'
 import { IoSearch } from 'react-icons/io5'
 import { RiCloseLine } from 'react-icons/ri'
 import { NavLink } from 'react-router-dom'
@@ -13,9 +13,15 @@ import { EmployeeModal } from '../../../components/index.components'
 
 const Employees = () => {
   const [employees, setEmployees] = useState([])
+  const [employee, setEmployee] = useState(null)
   const [showModal, setShowModal] = useState(false)
   const toggleModal = () => {
     setShowModal((prev) => !prev)
+  }
+
+  const updateRole = (employee) => {
+    setEmployee(employee)
+    toggleModal()
   }
   const deleteUser = (id) => {
     Swal.fire({
@@ -124,7 +130,15 @@ const Employees = () => {
                     {emp.Branch.name}
                   </th>
                   <td className="px-6 py-4">{emp.User.fullName}</td>
-                  <td className="px-6 py-4">{emp.jobTitle}</td>
+                  <td className="px-6 py-4 flex flex-row gap-3 items-center">
+                    <span>{emp.User.role}</span>
+                    <button
+                      className="hover:text-gray-200 transition-all duration-300 cursor-pointer"
+                      onClick={() => updateRole(emp)}
+                    >
+                      <FaUserEdit size={18} />
+                    </button>
+                  </td>
                   <td className="px-6 py-4">{emp.hireDate.split('T')[0]}</td>
                   <td className="px-6 py-4">
                     {emp.endDate ? emp.endDate.split('T')[0] : 'En empleo'}
@@ -159,7 +173,12 @@ const Employees = () => {
 
       {/* Modal */}
       <Toaster richColors position="bottom-right" />
-      <EmployeeModal showModal={showModal} toggleModal={toggleModal} />
+      <EmployeeModal
+        showModal={showModal}
+        toggleModal={toggleModal}
+        currentEmployee={employee}
+        setCurrentEmployee={setEmployee}
+      />
     </main>
   )
 }

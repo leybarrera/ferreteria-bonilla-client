@@ -642,6 +642,7 @@ export const proficiencies = [
 ]
 
 export const positions = [
+  'Administrador',
   'Asistente contable',
   'Asistente de Bodega',
   'Atención al Cliente',
@@ -649,6 +650,8 @@ export const positions = [
   'Cajero',
   'Chófer',
   'Contador',
+  'Gerente',
+  'Reclutador',
   'Jefe de Bodega',
   'Jefe de Recursos Humanos',
   'Mensajero',

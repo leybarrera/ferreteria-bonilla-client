@@ -11,7 +11,6 @@ import { AxiosError } from 'axios'
 import { useDispatch } from 'react-redux'
 import { storageUtil } from '../../utils/index.utils'
 import { setInfo } from '../../redux/slices/user.slice'
-import { setInfoAdmin } from '../../redux/slices/admin.slice'
 
 const Login = () => {
   const navigate = useNavigate()
@@ -51,12 +50,12 @@ const Login = () => {
         toast.success(`Bienvenido ${user.fullName}`)
 
         setTimeout(() => {
-          if (user.role === 'Administrador') {
-            dispatch(setInfoAdmin(user))
-            navigate('/dashboard')
-          } else {
+          if (user.role === 'Candidato') {
             dispatch(setInfo(user))
             navigate('/')
+          } else {
+            dispatch(setInfo(user))
+            navigate('/dashboard')
           }
         }, 2500)
       })

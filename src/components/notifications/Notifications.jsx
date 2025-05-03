@@ -8,7 +8,7 @@ import { dateUtil, storageUtil } from '../../utils/index.utils'
 import { setNotifications } from '../../redux/slices/app.slice'
 import { useDispatch } from 'react-redux'
 
-const Notifications = ({ showNotifications }) => {
+const Notifications = ({ showNotifications, toggleShowNotifications }) => {
   const navigate = useNavigate()
   const [notificationsArr, setNotificationsArr] = useState([])
   const { info } = useSelector((state) => state.user)
@@ -16,6 +16,7 @@ const Notifications = ({ showNotifications }) => {
 
   const markReadNotification = (id, type, relationId) => {
     const { token } = storageUtil.getData('session')
+    toggleShowNotifications()
     notificationApi
       .markAsRead(id, token)
       .then((res) => {
@@ -114,6 +115,7 @@ const Notifications = ({ showNotifications }) => {
         >
           <NavLink
             to={'/notifications'}
+            onClick={toggleShowNotifications}
             className="text-[#FD6C01] font-bold hover:text-[#ff850b] transition-all duration-300"
           >
             Ver todas las Notificaciones

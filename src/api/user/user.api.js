@@ -65,6 +65,14 @@ const userApi = {
       },
     })
   },
+
+  updatePassword: (token, data, id) => {
+    return instance.put(`/${model}/update-password/${id}`, data, {
+      headers: {
+        'x-token': token,
+      },
+    })
+  },
 }
 
 export default userApi

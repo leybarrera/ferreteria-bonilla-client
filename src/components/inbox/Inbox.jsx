@@ -1,13 +1,19 @@
 import { useEffect } from 'react'
 import { useSelector } from 'react-redux'
-import { NavLink } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
 import { messageApi } from '../../api/index.api'
 import { useState } from 'react'
 import { dateUtil } from '../../utils/index.utils'
 
-const Inbox = ({ showInbox }) => {
+const Inbox = ({ showInbox, toggleInbox }) => {
   const { info } = useSelector((state) => state.user)
+  const navigate = useNavigate()
   const [messagesArr, setMessagesArr] = useState([])
+
+  const openConversation = (senderId) => {
+    navigate(`/messages/${senderId}/${info.id}`)
+    toggleInbox()
+  }
 
   const groupMessagesByUser = (messages, currentUserId) => {
     const grouped = {}
@@ -70,6 +76,7 @@ const Inbox = ({ showInbox }) => {
                 message.unreadCount > 0 ? 'bg-gray-200' : ''
               }`}
               key={message.id}
+              onClick={() => openConversation(message.user.id)}
             >
               {/* Foto de perfil */}
               <img
@@ -115,6 +122,7 @@ const Inbox = ({ showInbox }) => {
         >
           <NavLink
             to={'/messages'}
+            onClick={toggleInbox}
             className="text-[#FD6C01] font-bold hover:text-[#ff850b] transition-all duration-300"
           >
             Ver todos los mensajes

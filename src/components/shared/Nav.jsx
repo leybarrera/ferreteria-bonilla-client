@@ -29,6 +29,7 @@ const Nav = ({ toggleShow }) => {
     setShowInbox((prev) => !prev)
     setShowNotifications(false)
     setShowSettings(false)
+    setUnreadMessages(0)
 
     if (currentBox !== 'msg') setCurrentBox('msg')
     else setCurrentBox(null)
@@ -55,6 +56,11 @@ const Nav = ({ toggleShow }) => {
       (notification) => !notification.isRead
     )
     setUnreadNotifications(notificationsUnread.length)
+
+    const unreadConversationsCount = messages.filter(
+      (cnv) => cnv.unreadCount > 0
+    ).length
+    setUnreadMessages(unreadConversationsCount)
   }, [messages, notifications])
   return (
     <nav className="h-[50px] bg-[#fd6c01] flex justify-center lg:px-0 px-10">
@@ -101,9 +107,9 @@ const Nav = ({ toggleShow }) => {
           >
             <BiSolidMessageRoundedDots size={18} />
 
-            {messages.unreadMessages > 0 && (
+            {unreadMessages > 0 && (
               <span className="absolute w-[20px] h-[20px] text-[10px] rounded-full bg-[#CB112D] text-white flex justify-center items-center -top-1 -right-1 z-50 border border-red-800 font-bold">
-                {messages.unreadMessages}
+                {unreadMessages}
               </span>
             )}
           </button>
@@ -140,9 +146,12 @@ const Nav = ({ toggleShow }) => {
           </button>
 
           {/* Box Messages */}
-          <Inbox showInbox={showInbox} />
+          <Inbox showInbox={showInbox} toggleInbox={toggleShowInbox} />
           {/* Box Notifications */}
-          <Notifications showNotifications={showNotifications} />
+          <Notifications
+            showNotifications={showNotifications}
+            toggleShowNotifications={toggleShowNotifications}
+          />
 
           {/* Box Settingss */}
           <Settings

@@ -1,16 +1,16 @@
 import { Outlet } from 'react-router-dom'
 import { useState } from 'react'
-import { AdminAside } from '../components/index.components'
+import { Aside } from '../components/index.components'
 import { GiHamburgerMenu } from 'react-icons/gi'
 
-const AdminLayout = () => {
+const ProtectedLayout = () => {
   const [showMenu, setShowMenu] = useState(false)
   const toggleMenu = () => {
     setShowMenu((prev) => !prev)
   }
   return (
     <>
-      <AdminAside showMenu={showMenu} toggleMenu={toggleMenu} />
+      <Aside showMenu={showMenu} toggleMenu={toggleMenu} />
       <button
         className="fixed top-5 left-5 lg:hidden"
         type="button"
@@ -25,4 +25,4 @@ const AdminLayout = () => {
   )
 }
 
-export default AdminLayout
+export default ProtectedLayout

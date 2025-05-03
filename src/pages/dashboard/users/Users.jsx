@@ -14,7 +14,7 @@ import { AxiosError } from 'axios'
 import { ConversationModal } from '../../../components/index.components'
 
 const Users = () => {
-  const { info } = useSelector((state) => state.admin)
+  const { info } = useSelector((state) => state.user)
   const [showConversation, setShowConversation] = useState(false)
   const [receiverId, setReceiverId] = useState(null)
   const handleConversation = (receiverId) => {
@@ -77,10 +77,8 @@ const Users = () => {
 
     userApi.getAllUsers(token).then((res) => {
       const { users } = res.data
-      const filteredUsers = users.filter(
-        (user) => user.role !== 'Administrador'
-      )
-      setUsers(filteredUsers)
+
+      setUsers(users)
     })
   }, [])
   return (
@@ -125,18 +123,22 @@ const Users = () => {
                 <th scope="col" className="px-6 py-5">
                   Verificado
                 </th>
-                <th scope="col" className="px-6 py-5">
-                  Validado
-                </th>
+                {info.role === 'Administrador' && (
+                  <th scope="col" className="px-6 py-5">
+                    Validado
+                  </th>
+                )}
                 <th scope="col" className="px-6 py-5">
                   Mensajes
                 </th>
                 <th scope="col" className="px-6 py-5">
-                  <span className="sr-only">Delete</span>
+                  <span className="sr-only">Perfil</span>
                 </th>
-                <th scope="col" className="px-6 py-5">
-                  <span className="sr-only">Delete</span>
-                </th>
+                {info.role === 'Administrador' && (
+                  <th scope="col" className="px-6 py-5">
+                    <span className="sr-only">Delete</span>
+                  </th>
+                )}
               </tr>
             </thead>
             <tbody>
@@ -155,18 +157,20 @@ const Users = () => {
                   <td className="px-6 py-4">{user.email}</td>
                   <td className="px-6 py-4">{user.role}</td>
                   <td className="px-6 py-4">{user.isVerified ? 'Si' : 'No'}</td>
-                  <td className="px-6 py-4">
-                    <label class="inline-flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
-                        value={user.isDataValidated}
-                        class="sr-only peer"
-                        checked={user.isDataValidated}
-                        onChange={(e) => validateUser(user.id, e)}
-                      />
-                      <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:w-5 after:h-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600 dark:peer-checked:bg-blue-600"></div>
-                    </label>
-                  </td>
+                  {info.role === 'Administrador' && (
+                    <td className="px-6 py-4">
+                      <label class="inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          value={user.isDataValidated}
+                          class="sr-only peer"
+                          checked={user.isDataValidated}
+                          onChange={(e) => validateUser(user.id, e)}
+                        />
+                        <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:w-5 after:h-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600 dark:peer-checked:bg-blue-600"></div>
+                      </label>
+                    </td>
+                  )}
                   <td className="px-6 py-4 text-right flex flex-row gap-5 items-center ">
                     <button
                       className="hover:text-gray-300 transition-all duration-300 cursor-pointer"
@@ -176,26 +180,32 @@ const Users = () => {
                     </button>
                   </td>
 
-                  <td className="px-6 py-4">
-                    <NavLink
-                      to={`${frontendUrl}/perfil/${user.id}`}
-                      className="underline"
-                      target="_blank"
-                    >
-                      Ver perfil
-                    </NavLink>
-                  </td>
+                  {user.role === 'Candidato' ? (
+                    <td className="px-6 py-4">
+                      <NavLink
+                        to={`${frontendUrl}/perfil/${user.id}`}
+                        className="underline"
+                        target="_blank"
+                      >
+                        Ver perfil
+                      </NavLink>
+                    </td>
+                  ) : (
+                    <td className="px-6 py-4"></td>
+                  )}
 
-                  <td className="px-6 py-4 text-right flex flex-row gap-5 items-center">
-                    <button
-                      className="cursor-pointer hover:text-red-500 transition-all duration-300"
-                      type="button"
-                      onClick={() => deleteUser(user.id)}
-                      title="Eliminar"
-                    >
-                      <FaTrash size={20} />
-                    </button>
-                  </td>
+                  {info.role === 'Administrador' && (
+                    <td className="px-6 py-4 text-right flex flex-row gap-5 items-center">
+                      <button
+                        className="cursor-pointer hover:text-red-500 transition-all duration-300"
+                        type="button"
+                        onClick={() => deleteUser(user.id)}
+                        title="Eliminar"
+                      >
+                        <FaTrash size={20} />
+                      </button>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>

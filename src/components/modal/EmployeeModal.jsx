@@ -8,22 +8,28 @@ import { branchApi, employeeApi, userApi } from '../../api/index.api'
 import { toast, Toaster } from 'sonner'
 import { AxiosError } from 'axios'
 
-const EmployeeModal = ({ showModal, toggleModal }) => {
+const EmployeeModal = ({
+  showModal,
+  toggleModal,
+  currentEmployee,
+  setCurrentEmployee,
+}) => {
   const [branches, setBranches] = useState([])
   const [users, setUsers] = useState([])
   const handleClose = () => {
     setEmployee({
       UserId: '',
       BranchId: '',
-      jobTitle: '',
+      role: '',
     })
+    setCurrentEmployee(null)
     toggleModal()
   }
 
   const [employee, setEmployee] = useState({
     UserId: '',
     BranchId: '',
-    jobTitle: '',
+    role: '',
   })
 
   const handleChange = (e) => {
@@ -43,29 +49,33 @@ const EmployeeModal = ({ showModal, toggleModal }) => {
       toast.error('Todos los campos son obligatorios')
       return
     }
-    employeeApi
-      .save(token, employee)
-      .then((res) => {
-        const { message } = res.data
-        toast.success(message)
-        setTimeout(() => {
-          toggleModal()
-        }, 2500)
-      })
-      .catch((err) => {
-        if (err instanceof AxiosError) {
-          toast.error(err.response.data.message)
-        } else {
-          toast.error('Error desconocido. Intente más tarde.')
-        }
-      })
+
+    if (currentEmployee === null) {
+      employeeApi
+        .save(token, employee)
+        .then((res) => {
+          const { message } = res.data
+          toast.success(message)
+          setTimeout(() => {
+            toggleModal()
+          }, 2500)
+        })
+        .catch((err) => {
+          if (err instanceof AxiosError) {
+            toast.error(err.response.data.message)
+          } else {
+            toast.error('Error desconocido. Intente más tarde.')
+          }
+        })
+    } else {
+      // Actualizar
+    }
   }
 
   useEffect(() => {
     const { token } = storageUtil.getData('session')
     branchApi.getAll().then((res) => {
       const { branches } = res.data
-      console.log(branches)
       setBranches(branches)
     })
 
@@ -74,7 +84,15 @@ const EmployeeModal = ({ showModal, toggleModal }) => {
       const filterUsers = users.filter((user) => user.role !== 'Administrador')
       setUsers(filterUsers)
     })
-  }, [])
+
+    if (currentEmployee !== null) {
+      setEmployee({
+        UserId: currentEmployee.UserId,
+        BranchId: currentEmployee.BranchId,
+        role: currentEmployee.User.role,
+      })
+    }
+  }, [currentEmployee])
   return (
     <div
       className={`${
@@ -83,7 +101,11 @@ const EmployeeModal = ({ showModal, toggleModal }) => {
     >
       <div className="lg:w-[800px] w-full h-fit bg-white border border-gray-200 rounded-lg overflow-hidden z-50">
         <header className="flex flex-row items-center justify-between border-b border-gray-200 p-5 bg-gray-200">
-          <h2 className="text-xl font-bold">Nuevo Empleado</h2>
+          <h2 className="text-xl font-bold">
+            {currentEmployee !== null
+              ? 'Actualizar empleado'
+              : 'Nuevo empleado'}
+          </h2>
           <button
             className="w-[30px] h-[30px] rounded-full bg-red-600 flex justify-center items-center cursor-pointer"
             onClick={handleClose}
@@ -106,11 +128,15 @@ const EmployeeModal = ({ showModal, toggleModal }) => {
                     onChange={handleChange}
                     className="outline-none h-[50px] bg-gray-100 rounded-lg px-2 border border-gray-300"
                   >
-                    <option selected disabled>
+                    <option disabled selected={currentEmployee === null}>
                       Elija la sucursal
                     </option>
                     {branches.map((branche) => (
-                      <option value={branche.id} key={branche.id}>
+                      <option
+                        value={branche.id}
+                        key={branche.id}
+                        selected={currentEmployee?.BranchId === branche.id}
+                      >
                         {branche.name}
                       </option>
                     ))}
@@ -121,16 +147,22 @@ const EmployeeModal = ({ showModal, toggleModal }) => {
                     Puesto
                   </label>
                   <select
-                    id="jobTitle"
-                    name="jobTitle"
+                    id="role"
+                    name="role"
                     onChange={handleChange}
                     className="outline-none h-[50px] bg-gray-100 rounded-lg px-2 border border-gray-300 disabled:cursor-not-allowed"
                   >
-                    <option selected disabled>
+                    <option disabled selected={currentEmployee === null}>
                       Elija el cargo
                     </option>
                     {positions.map((pos) => (
-                      <option value={pos}>{pos}</option>
+                      <option
+                        value={pos}
+                        key={pos}
+                        selected={currentEmployee?.User?.role === pos}
+                      >
+                        {pos}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -144,18 +176,21 @@ const EmployeeModal = ({ showModal, toggleModal }) => {
                   id="UserId"
                   name="UserId"
                   onChange={handleChange}
+                  disabled={currentEmployee !== null}
                   className="outline-none h-[50px] bg-gray-100 rounded-lg px-2 border border-gray-300"
                 >
-                  <option selected disabled>
+                  <option disabled selected={currentEmployee === null}>
                     Elija al empleado
                   </option>
                   {users.map((user) => (
                     <option
                       value={user.id}
                       key={user.id}
-                      //   disabled={!user.isDataValidated}
+                      disabled={!user.isDataValidated}
+                      selected={currentEmployee?.UserId === user.id}
                     >
-                      {user.fullName}
+                      {user.fullName}{' '}
+                      {!user.isDataValidated && ' - (No validado)'}
                     </option>
                   ))}
                 </select>

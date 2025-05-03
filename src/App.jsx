@@ -5,7 +5,7 @@ import AppRouter from './AppRouter'
 import { Loading } from './pages/index.pages'
 import { storageUtil } from './utils/index.utils'
 import { setInfo } from './redux/slices/user.slice'
-import { setInfoAdmin, setToken } from './redux/slices/admin.slice'
+import { setToken } from './redux/slices/admin.slice'
 
 const App = () => {
   const [isLoading, setIsLoading] = useState(true)
@@ -22,9 +22,9 @@ const App = () => {
       }
 
       const { user, token } = session
+      dispatch(setInfo(user))
 
       if (user?.role === 'Administrador') {
-        dispatch(setInfoAdmin(user))
         dispatch(setToken(token))
       } else {
         dispatch(setInfo(user))
