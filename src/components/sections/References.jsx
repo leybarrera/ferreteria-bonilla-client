@@ -48,10 +48,10 @@ const References = ({ userReferences, isOwner }) => {
               <div className="flex flex-col">
                 <h3 className="text-lg font-semibold">{reference.name}</h3>
                 <h5 className="text-sm font-light text-black">
-                  {reference.position}
+                  {reference.relationship}
                 </h5>
                 <h5 className="text-sm font-light text-black">
-                  {reference.contact}
+                  {reference.email} - {reference.phone}
                 </h5>
               </div>
             </article>

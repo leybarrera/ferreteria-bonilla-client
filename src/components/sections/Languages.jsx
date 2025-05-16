@@ -39,9 +39,9 @@ const Languages = ({ userLanguages, isOwner }) => {
               key={index}
               className="flex flex-col border-b border-gray-200 py-3"
             >
-              <h3 className="text-lg font-semibold ">{language.name}</h3>
+              <h3 className="text-lg font-semibold ">{language.language}</h3>
               <h5 className="text-sm font-light text-black">
-                Nivel: {language.level}
+                Nivel: {language.proficiencyLevel}
               </h5>
             </article>
           ))}

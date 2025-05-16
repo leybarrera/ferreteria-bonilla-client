@@ -206,8 +206,8 @@ const GeneralInfo = () => {
             <label htmlFor="email">Dirección</label>
             <input
               type="text"
-              name="address"
-              placeholder="Ingresa tu dirección"
+              name="residence"
+              placeholder="Ciudad/Provincia"
               value={info?.address}
               onChange={handleChange}
               className="w-full h-[50px] bg-gray-200 border border-gray-200 rounded-lg outline-none px-5"

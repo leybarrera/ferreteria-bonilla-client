@@ -11,8 +11,11 @@ import { AxiosError } from 'axios'
 import { useDispatch } from 'react-redux'
 import { storageUtil } from '../../utils/index.utils'
 import { setInfo } from '../../redux/slices/user.slice'
+import { useEffect } from 'react'
+import { useSelector } from 'react-redux'
 
 const Login = () => {
+  const { info } = useSelector((state) => state.user)
   const navigate = useNavigate()
   const dispatch = useDispatch()
   const [credentials, setCredentials] = useState({
@@ -95,6 +98,18 @@ const Login = () => {
   const handleGoogleFailure = () => {
     toast.error('Error al autenticar con Google')
   }
+
+  useEffect(() => {
+    const session = storageUtil.getData('session')
+
+    if (session) {
+      if (info.role === 'Administrador' || info.role === 'Reclutador') {
+        navigate('/dashboard')
+      } else {
+        navigate('/')
+      }
+    }
+  }, [])
   return (
     <GoogleOAuthProvider clientId={clientId}>
       <main className="w-full h-screen overflow-hidden flex flex-row">
@@ -154,9 +169,12 @@ const Login = () => {
             </div>
 
             <div className="flex justify-end opacity-80 text-[15px]">
-              <a href="#" className="hover:opacity-60 transition">
+              <NavLink
+                to={'/recuperacion'}
+                className="hover:opacity-60 transition"
+              >
                 ¿Olvidaste tu contraseña?
-              </a>
+              </NavLink>
             </div>
 
             <button

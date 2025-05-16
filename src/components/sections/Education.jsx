@@ -1,6 +1,7 @@
 import { LiaUniversitySolid } from 'react-icons/lia'
 import { AiFillEdit } from 'react-icons/ai'
 import { useNavigate } from 'react-router-dom'
+import { useEffect } from 'react'
 
 const Education = ({ userEducations, isOwner }) => {
   const navigate = useNavigate()
@@ -19,7 +20,7 @@ const Education = ({ userEducations, isOwner }) => {
     'Este usuario aún no ha completado su sección de educación. ¡Vuelve más tarde para conocer más sobre su formación académica!'
 
   return (
-    <div className="flex flex-col p-5 border border-gray-200 bg-white rounded-lg">
+    <div className="flex flex-col p-5 border border-gray-200 bg-white rounded-lg ">
       <div className="flex flex-row items-center justify-between">
         <h2 className="text-2xl font-bold">Educación</h2>
 
@@ -51,7 +52,8 @@ const Education = ({ userEducations, isOwner }) => {
                   {education.degree}
                 </h5>
                 <h5 className="text-sm font-light text-black">
-                  {education.startDate} - {education.endDate}
+                  {education.startYear} -{' '}
+                  {education.endYear ? education.endYear : 'Actualidad'}
                 </h5>
               </div>
             </article>

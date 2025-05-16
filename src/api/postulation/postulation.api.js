@@ -16,7 +16,7 @@ const postulationApi = {
   },
 
   getById: (token, id) => {
-    return instance.get(`/${model}/${id}`, {
+    return instance.get(`/${model}/postulation/${id}`, {
       headers: {
         'x-token': token,
       },
@@ -32,6 +32,23 @@ const postulationApi = {
   },
 
   cancelApplyJob: (token, id) => {
+    return instance.delete(`/${model}/${id}`, {
+      headers: {
+        'x-token': token,
+      },
+    })
+  },
+
+  updatePostulation: (token, data, id) => {
+    console.log(token, data, id)
+    return instance.put(`/${model}/update-postulation/${id}`, data, {
+      headers: {
+        'x-token': token,
+      },
+    })
+  },
+
+  deletePostulation: (token, id) => {
     return instance.delete(`/${model}/${id}`, {
       headers: {
         'x-token': token,

@@ -31,6 +31,20 @@ const Dashboard = () => {
 
   useEffect(() => {
     const session = storageUtil.getData('session')
+
+    if (!session) {
+      navigate('/inicio-sesion')
+      return
+    }
+
+    if (
+      session.user.role !== 'Administrador' &&
+      session.user.role !== 'Reclutador'
+    ) {
+      navigate('/inicio-sesion')
+      return
+    }
+
     userApi
       .getAllUsers(session.token)
       .then((res) => {
@@ -41,25 +55,35 @@ const Dashboard = () => {
         console.log(err)
       })
 
-    branchApi.getAll().then((res) => {
-      const { branches } = res.data
-      setBranches(branches)
-    })
+    if (info.role === 'Administrador') {
+      branchApi.getAll().then((res) => {
+        const { branches } = res.data
+        setBranches(branches)
+      })
+      jobOffersApi.getAll(session.token).then((res) => {
+        const { jobOffers } = res.data
+        setJobOffers(jobOffers)
+      })
+      postulationApi.getAll(session.token).then((res) => {
+        const { jobApplications } = res.data
+        setPostulations(jobApplications)
+      })
+      employeeApi.getAll(session.token).then((res) => {
+        const { employees } = res.data
+        setEmployees(employees)
+      })
+    } else {
+      // Get By Reclutador
+      jobOffersApi.getByEmployeeId(session.token, info.id).then((res) => {
+        const { jobOffers } = res.data
+        setJobOffers(jobOffers)
 
-    jobOffersApi.getAll(session.token).then((res) => {
-      const { jobOffers } = res.data
-      setJobOffers(jobOffers)
-    })
-
-    postulationApi.getAll(session.token).then((res) => {
-      const { jobApplications } = res.data
-      setPostulations(jobApplications)
-    })
-
-    employeeApi.getAll(session.token).then((res) => {
-      const { employees } = res.data
-      setEmployees(employees)
-    })
+        const postulations = jobOffers.reduce((acc, jobOffer) => {
+          return [...acc, ...jobOffer.JobApplications]
+        }, [])
+        setPostulations(postulations)
+      })
+    }
   }, [])
   return (
     <main className="w-full h-full flex lg:px-10 py-20 px-2">

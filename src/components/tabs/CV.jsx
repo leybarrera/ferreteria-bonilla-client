@@ -71,6 +71,7 @@ const CV = () => {
         handleCancel()
       })
       .catch((err) => {
+        console.log(err.message)
         console.error(err)
         alert('Hubo un error al eliminar el currículum.')
       })

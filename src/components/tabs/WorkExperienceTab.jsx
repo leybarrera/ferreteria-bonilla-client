@@ -5,10 +5,21 @@ import { useSelector } from 'react-redux'
 import { MdDelete } from 'react-icons/md'
 import { RiEyeFill } from 'react-icons/ri'
 import { AxiosError } from 'axios'
+import { Responsibilities } from '../index.components'
 
 const WorkExperienceTab = () => {
   const { info } = useSelector((state) => state.user)
   const [isCurrentWork, setIsCurrentWork] = useState(false)
+  const [showModal, setShowModal] = useState(false)
+  const [text, setText] = useState('')
+  const toggleModal = () => {
+    setShowModal((prev) => !prev)
+  }
+
+  const viewResponsibilities = (responsabilities) => {
+    setText(responsabilities)
+    toggleModal()
+  }
   const toggleCurrentWork = () => {
     setIsCurrentWork((prev) => !prev)
     setExperience((prev) => ({
@@ -21,7 +32,7 @@ const WorkExperienceTab = () => {
     jobTitle: '',
     startDate: '',
     isCurrentJob: false,
-    responsabilities: '',
+    responsibilities: '',
   }
 
   const [experience, setExperience] = useState(initialData)
@@ -70,6 +81,7 @@ const WorkExperienceTab = () => {
   }
 
   const handleSave = () => {
+    console.log(experience)
     if (Object.values(experience).some((educ) => educ === '')) {
       toast.error('Todos los datos son obligatorios')
       return
@@ -99,8 +111,8 @@ const WorkExperienceTab = () => {
     getAllData()
   }, [info])
 
-  return (
-    <main className="flex flex-col">
+  return !showModal ? (
+    <main className={`flex flex-col ${showModal && 'overflow-x-scroll'}`}>
       <div className="w-full max-w-[1000px] flex flex-col">
         <div className="flex flex-col gap-5">
           <div className="flex flex-col flex-1 gap-2">
@@ -174,9 +186,9 @@ const WorkExperienceTab = () => {
             </label>
             <textarea
               type="text"
-              name="responsabilities"
+              name="responsibilities"
               onChange={handleChange}
-              value={experience.responsabilities}
+              value={experience.responsibilities}
               className="h-[300px] p-5 bg-gray-200 border border-gray-200 rounded-lg outline-none resize-none"
             />
           </div>
@@ -232,7 +244,12 @@ const WorkExperienceTab = () => {
                       {wok.isCurrentJob ? 'Si' : 'No'}
                     </td>
                     <td className="px-6 py-4">
-                      <button className="cursor-pointer text-[#fd6c01] hover:text-[#cb4d03] transition-all duration-300">
+                      <button
+                        className="cursor-pointer text-[#fd6c01] hover:text-[#cb4d03] transition-all duration-300"
+                        onClick={() =>
+                          viewResponsibilities(wok.responsibilities)
+                        }
+                      >
                         <RiEyeFill size={20} />
                       </button>
                     </td>
@@ -254,6 +271,8 @@ const WorkExperienceTab = () => {
       </div>
       <Toaster richColors />
     </main>
+  ) : (
+    <Responsibilities text={text} toggleModal={toggleModal} />
   )
 }
 

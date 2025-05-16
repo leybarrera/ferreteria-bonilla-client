@@ -4,13 +4,43 @@ import { useState } from 'react'
 import { IoSearch } from 'react-icons/io5'
 import { useSelector } from 'react-redux'
 import { postulationApi } from '../../api/index.api'
-import { storageUtil } from '../../utils/index.utils'
+import { dateUtil, storageUtil } from '../../utils/index.utils'
 import { AxiosError } from 'axios'
 import { toast, Toaster } from 'sonner'
+import { useNavigate, useParams } from 'react-router-dom'
 
 const Applications = () => {
+  const { id } = useParams()
+  const navigate = useNavigate()
   const [postulations, setPostulations] = useState([])
+  const [postulation, setPostulation] = useState(null)
   const { info } = useSelector((state) => state.user)
+
+  const deletePostulation = async (id) => {
+    const { token } = storageUtil.getData('session')
+    postulationApi
+      .deletePostulation(token, id)
+      .then((res) => {
+        const { message } = res.data
+        toast.success(message)
+        if (id === postulation.id) {
+          setPostulation(null)
+          navigate('/applications')
+        } else {
+          const newPostulations = postulations.filter(
+            (postulation) => postulation.id !== id
+          )
+          setPostulations(newPostulations)
+        }
+      })
+      .catch((err) => {
+        if (err instanceof AxiosError) {
+          toast.error(err.response.data.message)
+        } else {
+          toast.error('Error desconocido. Intente mas tarde.')
+        }
+      })
+  }
 
   const cancelApplication = async (id) => {
     const { token } = storageUtil.getData('session')
@@ -58,17 +88,83 @@ const Applications = () => {
 
   useEffect(() => {
     const { token } = storageUtil.getData('session')
-    console.log(token, info.id)
-    postulationApi.getByUserId(info.id).then((res) => {
-      const { jobApplications } = res.data
-      console.log(jobApplications)
-      setPostulations(jobApplications)
-    })
+
+    if (!id) {
+      postulationApi.getByUserId(info.id).then((res) => {
+        const { jobApplications } = res.data
+        console.log(jobApplications)
+        setPostulations(jobApplications)
+      })
+    } else {
+      postulationApi.getById(token, id).then((res) => {
+        const { jobApplication } = res.data
+        setPostulation(jobApplication)
+      })
+    }
   }, [])
 
   return (
     <main className="lg:w-[1400px] mx-auto h-full w-full lg:px-0 px-5 py-10">
-      {postulations && postulations.length > 0 ? (
+      {postulation && id ? (
+        <article
+          className="h-fit w-full rounded-lg bg-white border border-gray-200 cursor-pointer transition-all duration-500 flex flex-col   px-5 relative py-10"
+          key={postulation.id}
+        >
+          {getStatusPill(postulation.status)}
+          <h2 className="font-bold text-2xl text-wrap ">
+            {postulation.JobOffer.title}
+          </h2>
+          <h4 className="text-gray-600 text-lg font-bold">
+            {postulation.JobOffer.Branch.name} -{' '}
+            {postulation.JobOffer.Branch.city}
+          </h4>
+          <h3 className="text-gray-400 text-[15px]">
+            {dateUtil.formatedDate(postulation.appliedAt)}
+          </h3>
+          <div className="flex flex-col mt-3">
+            <h4 className="font-bold">Carta de presentación</h4>
+            <div className="w-full h-[200px] bg-gray-200 rounded-lg mt-3 py-2 px-3">
+              <span className="text-sm text-wrap text-gray-600">
+                {postulation.coverLetter}
+              </span>
+            </div>
+          </div>
+          {postulation.observations && (
+            <div className="flex flex-col mt-3">
+              <h4 className="font-bold">Observaciones</h4>
+              <div className="w-full h-[200px] bg-gray-200 rounded-lg mt-3 py-2 px-3">
+                <span className="text-sm text-wrap text-gray-600">
+                  {postulation.observations}
+                </span>
+              </div>
+            </div>
+          )}
+          {postulation.status === 'Rechazada' && (
+            <button
+              className="mt-3 px-5 py-2 rounded-lg bg-red-700 text-white cursor-pointer hover:bg-red-800 transition-all duration-300 font-bold"
+              onClick={() => deletePostulation(postulation.id)}
+            >
+              Eliminar postulación
+            </button>
+          )}
+
+          {postulation.status === 'Pendiente' && (
+            <button
+              className="mt-3 px-5 py-2 rounded-lg bg-red-700 text-white cursor-pointer hover:bg-red-800 transition-all duration-300 font-bold"
+              onClick={() => cancelApplication(postulation.id)}
+            >
+              Cancelar postulación
+            </button>
+          )}
+
+          {postulation.status === 'Aceptada' && (
+            <span className="mt-3 px-5 py-2 rounded-lg bg-green-700 text-white cursor-pointer hover:bg-green-800 transition-all duration-300 font-bold">
+              Tú postulación ha sido aceptada. En breve te contactaremos para la
+              entrevista
+            </span>
+          )}
+        </article>
+      ) : postulations && postulations.length > 0 ? (
         <>
           {/* Barra de busqueda */}
           <div className="bg-white rounded-lg flex flex-row h-[50px] ">
@@ -89,25 +185,62 @@ const Applications = () => {
             {postulations.map((postulation) => {
               return (
                 <article
-                  className="lg:w-[350px] lg:h-[250px] w-full h-[250px] rounded-lg bg-white border border-gray-200 cursor-pointer hover:scale-110 transition-all duration-500 flex flex-col justify-center items-center px-5 relative"
+                  className="h-fit w-full rounded-lg bg-white border border-gray-200 cursor-pointer transition-all duration-500 flex flex-col   px-5 relative py-10"
                   key={postulation.id}
                 >
                   {getStatusPill(postulation.status)}
-                  <h2 className="font-bold text-2xl text-wrap text-center">
-                    Desarrollador Frontend
+                  <h2 className="font-bold text-2xl text-wrap ">
+                    {postulation.JobOffer.title}
                   </h2>
                   <h4 className="text-gray-600 text-lg font-bold">
-                    Empresa 1 - Presencial
+                    {postulation.JobOffer.Branch.name} -{' '}
+                    {postulation.JobOffer.Branch.city}
                   </h4>
                   <h3 className="text-gray-400 text-[15px]">
-                    Aplicado el 01/01/2023
+                    {dateUtil.formatedDate(postulation.appliedAt)}
                   </h3>
-                  <button
-                    className="mt-3 px-5 py-2 rounded-lg bg-red-700 text-white cursor-pointer hover:bg-red-800 transition-all duration-300 font-bold"
-                    onClick={() => cancelApplication(postulation.id)}
-                  >
-                    Cancelar
-                  </button>
+                  <div className="flex flex-col mt-3">
+                    <h4 className="font-bold">Carta de presentación</h4>
+                    <div className="w-full h-[200px] bg-gray-200 rounded-lg mt-3 py-2 px-3">
+                      <span className="text-sm text-wrap text-gray-600">
+                        {postulation.coverLetter}
+                      </span>
+                    </div>
+                  </div>
+                  {postulation.observations && (
+                    <div className="flex flex-col mt-3">
+                      <h4 className="font-bold">Observaciones</h4>
+                      <div className="w-full h-[200px] bg-gray-200 rounded-lg mt-3 py-2 px-3">
+                        <span className="text-sm text-wrap text-gray-600">
+                          {postulation.observations}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                  {postulation.status === 'Rechazada' && (
+                    <button
+                      className="mt-3 px-5 py-2 rounded-lg bg-red-700 text-white cursor-pointer hover:bg-red-800 transition-all duration-300 font-bold"
+                      onClick={() => cancelApplication(postulation.id)}
+                    >
+                      Eliminar postulación
+                    </button>
+                  )}
+
+                  {postulation.status === 'Pendiente' && (
+                    <button
+                      className="mt-3 px-5 py-2 rounded-lg bg-red-700 text-white cursor-pointer hover:bg-red-800 transition-all duration-300 font-bold"
+                      onClick={() => cancelApplication(postulation.id)}
+                    >
+                      Cancelar postulación
+                    </button>
+                  )}
+
+                  {postulation.status === 'Aceptada' && (
+                    <span className="mt-3 px-5 py-2 rounded-lg bg-green-700 text-white cursor-pointer hover:bg-green-800 transition-all duration-300 font-bold">
+                      Tú postulación ha sido aceptada. En breve te contactaremos
+                      para la entrevista
+                    </span>
+                  )}
                 </article>
               )
             })}

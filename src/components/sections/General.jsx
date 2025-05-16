@@ -82,7 +82,7 @@ const General = ({ infoUser, isOwner }) => {
             type="text"
             disabled
             className="border border-gray-300 rounded-lg p-2 bg-gray-50 text-gray-900 font-semibold"
-            value={infoUser?.address || 'N/A'}
+            value={infoUser?.residence || 'N/A'}
           />
         </div>
       </div>

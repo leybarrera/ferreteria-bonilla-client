@@ -3,8 +3,10 @@ import { GrClose } from 'react-icons/gr'
 import { MdOutlineKeyboardArrowDown } from 'react-icons/md'
 import { TbMessageChatbot } from 'react-icons/tb'
 import { responses, rules } from '../../data/data'
+import { useLocation } from 'react-router-dom'
 
 const Chatbot = () => {
+  const location = useLocation()
   const [showInput, setShowInput] = useState(false)
   const [question, setQuestion] = useState('')
   const messagesEndRef = useRef(null) // Aquí se hace referencia al contenedor de los mensajes
@@ -83,11 +85,15 @@ const Chatbot = () => {
     ))
   }
 
+  useEffect(() => {
+    console.log(location)
+  }, [showInput])
+
   return (
     <>
       {/* Chatbot */}
       <div
-        className={`w-[400px] h-[600px] bg-white fixed bottom-24 right-14 z-50 rounded-xl border border-gray-300 flex flex-col overflow-hidden ${
+        className={`lg:w-[400px] lg:h-[600px] h-full w-full bg-white fixed lg:bottom-24 not-lg:top-0 lg:right-14 not-lg:left-0 z-50 rounded-xl border border-gray-300 flex flex-col overflow-hidden ${
           showInput ? 'block' : 'hidden'
         } transition-all duration-300`}
       >
@@ -143,11 +149,32 @@ const Chatbot = () => {
               value={question}
               id="msg"
               className="h-[40px] rounded-full bg-white w-full px-4 py-2 border border-gray-300 mt-4 m"
-              placeholder="Mensaje..."
+              placeholder="Escribe tutorial para guiarte"
               onChange={handleChange}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
-                  handleSendMessage()
+                  if (question.trim() === 'tutorial') {
+                    const auxQuestion = `tutorial - ${
+                      location.pathname === '/'
+                        ? 'home'
+                        : location.pathname.split('/')[1]
+                    }`
+
+                    setMessages((prev) => [
+                      ...prev,
+                      {
+                        type: 'user',
+                        text: question,
+                      },
+                    ])
+
+                    setQuestion('')
+                    setTimeout(() => {
+                      responseToUser(auxQuestion)
+                    }, 1500)
+                  } else {
+                    handleSendMessage()
+                  }
                 }
               }}
             />

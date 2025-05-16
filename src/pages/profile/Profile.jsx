@@ -1,7 +1,5 @@
 import { useEffect } from 'react'
-import { FaIdCard } from 'react-icons/fa'
-import { IoBusinessSharp, IoQrCode } from 'react-icons/io5'
-import { LiaUniversitySolid } from 'react-icons/lia'
+import { IoQrCode } from 'react-icons/io5'
 import { useParams } from 'react-router-dom'
 import {
   General,
@@ -21,7 +19,6 @@ import { AxiosError } from 'axios'
 import { toast, Toaster } from 'sonner'
 import { PiEmptyBold } from 'react-icons/pi'
 
-/******  1c7439e3-a1fa-4f13-bbce-21f1d2b8e9df  *******/
 const Profile = () => {
   const [showQR, setShowQR] = useState(false)
 
@@ -37,8 +34,6 @@ const Profile = () => {
 
   const [loading, setLoading] = useState(true)
 
-  const [isMyProfile, setIsMyProfile] = useState(false)
-
   const toggleShowQR = () => {
     setShowQR((prev) => !prev)
   }
@@ -49,21 +44,22 @@ const Profile = () => {
       .getById(id)
       .then((res) => {
         const { user } = res.data
+        console.log(user)
         const {
           About,
           UserSkills,
-          UserEducation,
-          UserExperience,
-          UserReference,
-          UserLanguage,
+          UserEducations,
+          UserExperiences,
+          UserReferences,
+          UserLanguages,
         } = user
 
         setInfoUser(user)
         setUserSkills(UserSkills)
-        setUserEducations(UserEducation)
-        setuserExperiences(UserExperience)
-        setUserReferences(UserReference)
-        setUserLanguages(UserLanguage)
+        setUserEducations(UserEducations)
+        setuserExperiences(UserExperiences)
+        setUserReferences(UserReferences)
+        setUserLanguages(UserLanguages)
         setAbout(About)
       })
       .catch((err) => {

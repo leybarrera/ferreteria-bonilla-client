@@ -12,7 +12,7 @@ const ProtectedLayout = () => {
     <>
       <Aside showMenu={showMenu} toggleMenu={toggleMenu} />
       <button
-        className="fixed top-5 left-5 lg:hidden"
+        className={`fixed top-5 left-5 lg:hidden ${!showMenu && 'z-50'}`}
         type="button"
         onClick={toggleMenu}
       >

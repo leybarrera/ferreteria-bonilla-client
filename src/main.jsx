@@ -6,12 +6,15 @@ import { BrowserRouter } from 'react-router-dom'
 import { Provider } from 'react-redux'
 import { store } from './redux/store.js'
 import { Chatbot } from './components/index.components.js'
+import { VoiceProvider } from './context/VoiceContext.jsx'
 
 createRoot(document.getElementById('root')).render(
   <Provider store={store}>
-    <BrowserRouter>
-      <App />
-      <Chatbot />
-    </BrowserRouter>
+    <VoiceProvider>
+      <BrowserRouter>
+        <App />
+        <Chatbot />
+      </BrowserRouter>
+    </VoiceProvider>
   </Provider>
 )

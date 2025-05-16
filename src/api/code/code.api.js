@@ -16,6 +16,16 @@ const codeApi = {
       type,
     })
   },
+
+  recoveryPassword: (email) => {
+    return instance.post(`/${model}/recovery-code`, {
+      email,
+    })
+  },
+
+  changePassword: (data) => {
+    return instance.put(`/${model}/change-password`, data)
+  },
 }
 
 export default codeApi

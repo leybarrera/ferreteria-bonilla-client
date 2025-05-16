@@ -59,7 +59,7 @@ const Users = () => {
     const { token } = storageUtil.getData('session')
     const { checked } = e.target
 
-    userApi.validateAccount(token, id, checked).then((res) => {
+    userApi.validateAccount(token, id, checked, info.id).then((res) => {
       const { message } = res.data
       toast.success(message)
     })

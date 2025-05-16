@@ -292,6 +292,47 @@ export const rules = {
     'cómo completar mi perfil?',
     '¿cómo completar mi perfil',
   ],
+  'tutorial - home': [
+    'tutorial - home',
+    'tutorial home',
+    'tutorial de home',
+    'tutorial de home?',
+  ],
+
+  'tutorial - perfil': [
+    'tutorial - perfil',
+    'tutorial perfil',
+    'tutorial de perfil',
+    'tutorial de perfil?',
+  ],
+
+  'tutorial - applications': [
+    'tutorial - applications',
+    'tutorial applications',
+    'tutorial de applications',
+    'tutorial de applications?',
+  ],
+
+  'tutorial - messages': [
+    'tutorial - messages',
+    'tutorial messages',
+    'tutorial de messages',
+    'tutorial de messages?',
+  ],
+
+  'tutorial - settings': [
+    'tutorial - settings',
+    'tutorial settings',
+    'tutorial de settings',
+    'tutorial de settings?',
+  ],
+
+  'tutorial - dashboard': [
+    'tutorial - dashboard',
+    'tutorial dashboard',
+    'tutorial de dashboard',
+    'tutorial de dashboard?',
+  ],
 }
 
 export const responses = {
@@ -325,6 +366,25 @@ export const responses = {
     2. Dirígete a la sección de "Perfil".
     3. Completa la información requerida.
     4. Guarda los cambios.`,
+  ],
+
+  'tutorial - home': [
+    `En el home principal podrás encontrar las ofertas de trabajo publicadas, las sucursales registradas y las vacantes disponibles.`,
+  ],
+  'tutorial - perfil': [
+    `En tu perfil podrás encontrar tus datos personales, tus habilidades, tus experiencias laborales, tus referencias personales, tus idiomas y tus estudios.`,
+  ],
+  'tutorial - applications': [
+    `En la sección de "Postulaciones" podrás encontrar las ofertas de trabajo a las que has aplicado, así como las respuestas de los reclutadores.`,
+  ],
+  'tutorial - messages': [
+    `En la sección de "Mensajes" podrás encontrar los mensajes enviados y recibidos.`,
+  ],
+  'tutorial - settings': [
+    `En la sección de "Configuración" podrás actualizar tus datos personales, tus habilidades, tus experiencias laborales, tus referencias personales, tus idiomas y tus estudios.`,
+  ],
+  'tutorial - dashboard': [
+    `En el dashboard podrás encontrar las ofertas de trabajo publicadas, las sucursales registradas, los usuarios registrados, las postulaciones y los empleados.`,
   ],
 }
 

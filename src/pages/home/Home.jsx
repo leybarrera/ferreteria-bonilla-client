@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { FaPlus } from 'react-icons/fa'
 import { IoArrowForwardOutline, IoQrCode } from 'react-icons/io5'
 import { useSelector } from 'react-redux'
-import { NavLink } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
 import { toast, Toaster } from 'sonner'
 import {
   branchApi,
@@ -19,15 +19,26 @@ import {
   setNotifications,
   setOffers,
 } from '../../redux/slices/app.slice'
-import { QRComponent } from '../../components/index.components.js'
+import {
+  CoverLetterModal,
+  QRComponent,
+} from '../../components/index.components.js'
 import { useDispatch } from 'react-redux'
 import { dateUtil, storageUtil } from '../../utils/index.utils.js'
 import { AxiosError } from 'axios'
 
 const Home = () => {
+  const navigate = useNavigate()
   const [showQR, setShowQR] = useState(false)
   const [jobOffers, setJobOffers] = useState([])
+  const [jobOfferId, setJobOfferId] = useState(null)
   const [messagesArr, setMessagesArr] = useState([])
+  const [coverLetter, setCoverLetter] = useState(null)
+  const [showCoverLetter, setShowCoverLetter] = useState(false)
+
+  const toggleShowCoverLetter = () => {
+    setShowCoverLetter((prev) => !prev)
+  }
 
   const [postulations, setPostulations] = useState([])
   const [interests, setInterests] = useState([])
@@ -142,12 +153,14 @@ const Home = () => {
   //   )
   // }, [profileCompleted])
 
-  const applyJob = (JobOfferId) => {
+  const handleConfirmApplyJob = () => {
     const { token } = storageUtil.getData('session')
+    toggleShowCoverLetter()
     postulationApi
       .applyJob(token, {
         UserId: info.id,
-        JobOfferId,
+        JobOfferId: jobOfferId,
+        coverLetter,
       })
       .then((res) => {
         const { message } = res.data
@@ -161,6 +174,11 @@ const Home = () => {
           toast.error('Error desconocido. Intente más tarde.')
         }
       })
+  }
+
+  const applyJob = (JobOfferId) => {
+    toggleShowCoverLetter()
+    setJobOfferId(JobOfferId)
   }
 
   const cancelApplyJob = (id) => {
@@ -182,7 +200,13 @@ const Home = () => {
   }
 
   useEffect(() => {
-    const { token } = storageUtil.getData('session')
+    const session = storageUtil.getData('session')
+    if (!session) {
+      navigate('/inicio-sesion')
+      return
+    }
+
+    const { token } = session
 
     // Get sucursales
     branchApi
@@ -321,7 +345,6 @@ const Home = () => {
                   <p className="text-justify text-[15px] text-black font-medium mb-3">
                     {offer.description}
                   </p>
-
                   <h3 className="text-xs text-[#00000099]">
                     {offer.type}, {offer.contractType}
                   </h3>
@@ -329,14 +352,8 @@ const Home = () => {
                     $ {offer.salary}
                   </h3>
 
-                  {isPostulated ? (
-                    <button
-                      className="w-full py-2 flex flex-row items-center justify-center gap-2 mt-3 bg-gray-800 text-white text-lg font-bold rounded-xl cursor-pointer hover:bg-gray-700 transition-colors duration-300"
-                      onClick={() => cancelApplyJob(postulationFound.id)}
-                    >
-                      Cancelar aplicación
-                    </button>
-                  ) : (
+                  {/* Botones y estados de postulación */}
+                  {!postulationFound && (
                     <button
                       className="w-full py-2 flex flex-row items-center justify-center gap-2 mt-3 bg-[#ff850b] text-white text-lg font-bold rounded-xl cursor-pointer hover:bg-[#fd6c01] transition-colors duration-300 disabled:bg-gray-400 disabled:cursor-not-allowed"
                       onClick={() => applyJob(offer.id)}
@@ -346,6 +363,27 @@ const Home = () => {
                         ? 'Aplicar'
                         : 'Completa tu perfil para aplicar'}
                     </button>
+                  )}
+
+                  {postulationFound?.status === 'Pendiente' && (
+                    <button
+                      className="w-full py-2 flex flex-row items-center justify-center gap-2 mt-3 bg-gray-800 text-white text-lg font-bold rounded-xl cursor-pointer hover:bg-gray-700 transition-colors duration-300"
+                      onClick={() => cancelApplyJob(postulationFound.id)}
+                    >
+                      Cancelar aplicación
+                    </button>
+                  )}
+
+                  {postulationFound?.status === 'Aceptada' && (
+                    <h3 className="text-sm font-semibold text-green-600 mt-2">
+                      Ya has sido aceptado para esta oferta.
+                    </h3>
+                  )}
+
+                  {postulationFound?.status === 'Rechazada' && (
+                    <h3 className="text-sm font-semibold text-red-600 mt-2">
+                      Tu postulación fue rechazada. Gracias por tu interés.
+                    </h3>
                   )}
                 </main>
               </article>
@@ -444,6 +482,14 @@ const Home = () => {
         closeButton
         duration={1000000}
       />
+      {showCoverLetter && (
+        <CoverLetterModal
+          toggleShowCoverLetter={toggleShowCoverLetter}
+          coverLetter={coverLetter}
+          setCoverLetter={setCoverLetter}
+          handleConfirmApplyJob={handleConfirmApplyJob}
+        />
+      )}
 
       {showQR && <QRComponent toggleShowQR={toggleShowQR} />}
     </main>

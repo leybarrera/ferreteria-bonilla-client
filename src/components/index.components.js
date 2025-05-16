@@ -31,6 +31,9 @@ import {
   OfferModal,
   NewOfferModal,
   ConversationModal,
+  PostulationModal,
+  CoverLetterModal,
+  Responsibilities,
 } from './modal/index.modal'
 export {
   Chatbot,
@@ -60,5 +63,8 @@ export {
   EmployeeModal,
   OfferModal,
   NewOfferModal,
+  CoverLetterModal,
   ConversationModal,
+  PostulationModal,
+  Responsibilities,
 }

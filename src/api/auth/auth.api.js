@@ -12,6 +12,10 @@ const authApi = {
       password,
     })
   },
+
+  changePassword: (data) => {
+    return instance.put(`/${model}/change-password`, data)
+  },
 }
 
 export default authApi

@@ -20,8 +20,13 @@ const updateData = (key, data) => {
   saveData(key, newStorage)
 }
 
+const removeData = (key) => {
+  localStorage.removeItem(key)
+}
+
 export default {
   saveData,
   getData,
   updateData,
+  removeData,
 }

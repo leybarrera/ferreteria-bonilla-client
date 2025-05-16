@@ -1,6 +1,7 @@
 import { IoBusinessSharp } from 'react-icons/io5'
 import { AiFillEdit } from 'react-icons/ai'
 import { useNavigate } from 'react-router-dom'
+import { useEffect } from 'react'
 
 const WorkExperience = ({ userExperiences, isOwner }) => {
   const navigate = useNavigate()
@@ -47,21 +48,21 @@ const WorkExperience = ({ userExperiences, isOwner }) => {
 
               <div className="flex flex-col">
                 <h3 className="text-lg font-semibold ">
-                  {experience.position}
+                  {experience.jobTitle}
                 </h3>
                 <h5 className="text-sm font-light text-black">
-                  {experience.company} - {experience.type}
+                  {experience.companyName}
                 </h5>
                 <h5 className="text-sm font-light text-black">
                   {experience.startDate} - {experience.endDate} /{' '}
-                  {experience.duration}
+                  {experience.endDate - experience.startDate} años
                 </h5>
-                <h5 className="text-sm font-light text-black">
+                {/* <h5 className="text-sm font-light text-black">
                   {experience.location} - {experience.workMode}
-                </h5>
+                </h5> */}
 
                 <p className="mt-2 text-[15px] text-black font-light text-wrap">
-                  {experience.description}
+                  {experience.responsibilities}
                 </p>
               </div>
             </article>

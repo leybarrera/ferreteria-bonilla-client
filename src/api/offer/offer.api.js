@@ -41,6 +41,14 @@ const jobOffersApi = {
       },
     })
   },
+
+  getByEmployeeId: (token, id) => {
+    return instance.get(`/${model}/by-employee/${id}`, {
+      headers: {
+        'x-token': token,
+      },
+    })
+  },
 }
 
 export default jobOffersApi

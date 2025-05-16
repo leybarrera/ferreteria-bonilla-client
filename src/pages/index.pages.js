@@ -11,6 +11,7 @@ import VerificationAccount from './verification-account/VerificationAccount'
 import BranchesPage from './branches/Branches'
 import JobOffers from './offers/JobOffers'
 import Home from './home/Home'
+import Recovery from './recovery/Recovery'
 
 export {
   Activation,
@@ -26,4 +27,5 @@ export {
   VerificationAccount,
   BranchesPage,
   JobOffers,
+  Recovery,
 }

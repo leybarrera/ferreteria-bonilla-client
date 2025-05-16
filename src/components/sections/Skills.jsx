@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { AiFillEdit } from 'react-icons/ai'
 import { useNavigate } from 'react-router-dom'
 
@@ -12,13 +13,17 @@ const Skills = ({ userSkills, isOwner }) => {
     })
   }
 
+  useEffect(() => {
+    console.log(userSkills)
+  }, [])
+
   const ownerMessage =
     '¡Agrega tus habilidades para que otros vean lo que puedes ofrecer! Completa tu lista de habilidades para mejorar tu perfil.'
   const defaultMessage =
     'Este usuario aún no ha completado su lista de habilidades. ¡Vuelve más tarde para conocer más sobre sus capacidades!'
 
   return (
-    <div className="flex flex-col p-5 border border-gray-200 bg-white rounded-lg">
+    <div className="flex flex-col p-5 border border-gray-200 bg-white rounded-lg ">
       <div className="flex flex-row items-center justify-between">
         <h2 className="text-2xl font-bold">Habilidades</h2>
 
@@ -53,9 +58,9 @@ const Skills = ({ userSkills, isOwner }) => {
                     scope="row"
                     className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap"
                   >
-                    {skill.name}
+                    {skill.skill}
                   </th>
-                  <td className="px-6 py-4">{skill.experience}</td>
+                  <td className="px-6 py-4">{skill.proficiencyLevel}</td>
                 </tr>
               ))}
             </tbody>

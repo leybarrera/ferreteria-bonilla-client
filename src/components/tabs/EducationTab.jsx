@@ -40,6 +40,15 @@ const EducationTab = () => {
       })
   }
 
+  const handleEndDate = (e) => {
+    const { value } = e.target
+    const year = value.split('-')[0]
+    setEducation((prev) => ({
+      ...prev,
+      endYear: year,
+    }))
+  }
+
   const handleDate = (e) => {
     const { name, value } = e.target
     const year = value.split('-')[0]
@@ -147,7 +156,7 @@ const EducationTab = () => {
               <input
                 type="date"
                 name="endYear"
-                onChange={handleDate}
+                onChange={handleEndDate}
                 className="h-[60px] px-2 bg-gray-200 border border-gray-200 rounded-lg outline-none"
               />
             </div>
@@ -201,7 +210,7 @@ const EducationTab = () => {
                     <td className="px-6 py-4">{edu.degree}</td>
                     <td className="px-6 py-4">{edu.fieldOfStudy}</td>
                     <td className="px-6 py-4">{edu.startYear}</td>
-                    <td className="px-6 py-4">{edu.endDate || 'En curso'}</td>
+                    <td className="px-6 py-4">{edu.endYear || 'En curso'}</td>
 
                     <td className="px-6 py-4 text-right">
                       <button

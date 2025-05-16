@@ -7,8 +7,10 @@ import { AxiosError } from 'axios'
 import { toast, Toaster } from 'sonner'
 import Swal from 'sweetalert2'
 import { NewOfferModal } from '../../../components/index.components.js'
+import { useSelector } from 'react-redux'
 
 const Offers = () => {
+  const { info } = useSelector((state) => state.user)
   const [showModal, setShowModal] = useState(false)
   const toggleModal = () => {
     setShowModal((prev) => !prev)
@@ -63,10 +65,17 @@ const Offers = () => {
 
   useEffect(() => {
     const { token } = storageUtil.getData('session')
-    jobOffersApi.getAll(token).then((res) => {
-      const { jobOffers } = res.data
-      setOffers(jobOffers)
-    })
+    if (info.role === 'Administrador') {
+      jobOffersApi.getAll(token).then((res) => {
+        const { jobOffers } = res.data
+        setOffers(jobOffers)
+      })
+    } else {
+      jobOffersApi.getByEmployeeId(token, info.id).then((res) => {
+        const { jobOffers } = res.data
+        setOffers(jobOffers)
+      })
+    }
   }, [])
   return (
     <main

@@ -12,6 +12,7 @@ import {
   VerificationAccount,
   BranchesPage,
   JobOffers,
+  Recovery,
 } from './pages/index.pages'
 import HomeLayout from './layout/HomeLayout'
 import Dashboard from './pages/dashboard/Dashboard'
@@ -29,10 +30,14 @@ const AppRouter = () => {
       <Route path="/" element={<HomeLayout />}>
         <Route index element={<Home />} />
         <Route path="/applications" element={<Applications />} />
+        <Route path="/applications/:id" element={<Applications />} />
+
         <Route path="/notifications" element={<Notifications />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/perfil/:id" element={<Profile />} />
         <Route path="/activation" element={<Activation />} />
+        <Route path="/recuperacion" element={<Recovery />} />
+
         <Route path="/branches" element={<BranchesPage />} />
         <Route path="/branches/:id" element={<BranchesPage />} />
         <Route path="/offers" element={<JobOffers />} />

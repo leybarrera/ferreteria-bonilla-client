@@ -5,9 +5,13 @@ import { RiLogoutCircleFill, RiSettings3Fill } from 'react-icons/ri'
 import { useSelector } from 'react-redux'
 import { NavLink, useNavigate } from 'react-router-dom'
 
-const Settings = ({ showSettings, toggleShowSettings }) => {
+const Settings = ({ showSettings, toggleShowSettings, logout }) => {
   const { info } = useSelector((state) => state.user)
   const navigate = useNavigate()
+
+  const handleLogout = () => {
+    logout()
+  }
 
   const goToProfile = () => {
     toggleShowSettings()
@@ -27,13 +31,16 @@ const Settings = ({ showSettings, toggleShowSettings }) => {
           onClick={goToProfile}
         >
           <img
-            src="/public/user.png"
+            src={info.profilePicture ? info.profilePicture : '/user.png'}
             alt="Profile Image"
             className="w-[50px] h-[50px] rounded-full"
           />
-          <h2 className="font-bold text-gray-900 text-lg">
-            Cristhian Rodríguez
-          </h2>
+          <div className="flex flex-col items-start">
+            <h2 className="font-bold text-gray-900 text-lg">
+              Cristhian Rodríguez
+            </h2>
+            <h3>{info.email}</h3>
+          </div>
         </button>
       </section>
 
@@ -54,10 +61,13 @@ const Settings = ({ showSettings, toggleShowSettings }) => {
           <LuChevronRight size={20} />
         </NavLink>
 
-        <NavLink className="py-5 px-2 gap-2 flex flex-row items-center justify-between hover:bg-gray-200 rounded-lg transition-all duration-300">
+        <button
+          className="py-5 px-2 gap-2 flex flex-row items-center   hover:bg-gray-200 rounded-lg transition-all duration-300"
+          onClick={handleLogout}
+        >
           <RiLogoutCircleFill size={20} />
-          <h3 className="flex-1 text-lg font-normal">Cerrar sesión</h3>
-        </NavLink>
+          <h3 className="text-lg font-normal">Cerrar sesión</h3>
+        </button>
       </section>
     </div>
   )
