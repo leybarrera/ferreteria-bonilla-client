@@ -1,75 +1,100 @@
-import { useEffect, useState } from 'react'
-import { useSelector } from 'react-redux'
-import { toast, Toaster } from 'sonner'
-import { userEducationApi } from '../../api/index.api'
-import { MdDelete } from 'react-icons/md'
-import { AxiosError } from 'axios'
+import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { toast, Toaster } from "sonner";
+import { userEducationApi } from "../../api/index.api";
+import { MdDelete } from "react-icons/md";
+import { AxiosError } from "axios";
 
 const EducationTab = () => {
-  const { info } = useSelector((state) => state.user)
+  const { info } = useSelector((state) => state.user);
   const initialData = {
     institution: null,
     degree: null,
     fieldOfStudy: null,
     startYear: null,
-  }
-  const [education, setEducation] = useState(initialData)
-  const [educations, setEducations] = useState([])
+  };
+  const [education, setEducation] = useState(initialData);
+  const [educations, setEducations] = useState([]);
 
   const getAllData = () => {
     userEducationApi.getByUserId(info.id).then((res) => {
-      const { userEducations } = res.data
-      setEducations(userEducations)
-    })
-  }
+      const { userEducations } = res.data;
+      setEducations(userEducations);
+    });
+  };
 
   const deleteEducation = (id) => {
     userEducationApi
       .delete(id)
       .then((res) => {
-        const { message } = res.data
-        toast.success(message)
-        getAllData()
+        const { message } = res.data;
+        toast.success(message);
+        getAllData();
       })
       .catch((err) => {
         if (err instanceof AxiosError) {
-          toast.error(err.response.data.message)
+          toast.error(err.response.data.message);
         } else {
-          toast.error('Error desconocido. Intente más tarde.')
+          toast.error("Error desconocido. Intente más tarde.");
         }
-      })
-  }
+      });
+  };
 
   const handleEndDate = (e) => {
-    const { value } = e.target
-    const year = value.split('-')[0]
+    const value = e.target.value;
+    const selectedDate = new Date(value);
+    const today = new Date();
+
+    selectedDate.setHours(0, 0, 0, 0);
+    today.setHours(0, 0, 0, 0);
+
+    if (selectedDate > today) {
+      toast.error("La fecha no puede ser posterior a la actual");
+      e.target.value = "";
+      return;
+    }
+
+    const year = value.split("-")[0];
     setEducation((prev) => ({
       ...prev,
       endYear: year,
-    }))
-  }
+    }));
+  };
 
   const handleDate = (e) => {
-    const { name, value } = e.target
-    const year = value.split('-')[0]
+    const name = e.target.name;
+    const value = e.target.value;
+    const selectedDate = new Date(value);
+    const today = new Date();
+
+    selectedDate.setHours(0, 0, 0, 0);
+    today.setHours(0, 0, 0, 0);
+
+    if (selectedDate > today) {
+      toast.error("La fecha no puede ser posterior a la actual");
+      e.target.value = "";
+      return;
+    }
+
+    const year = value.split("-")[0];
     setEducation((prev) => ({
       ...prev,
       [name]: year,
-    }))
-  }
+    }));
+  };
 
   const handleChange = (e) => {
-    const { name, value } = e.target
+    const { name, value } = e.target;
     setEducation((prev) => ({
       ...prev,
       [name]: value,
-    }))
-  }
+    }));
+  };
 
   const handleSave = () => {
     if (Object.values(education).some((educ) => !educ)) {
-      toast.error('Todos los datos son obligatorios')
-      return
+      toast.error("Todos los datos son obligatorios");
+      return;
     }
 
     userEducationApi
@@ -78,23 +103,23 @@ const EducationTab = () => {
         UserId: info.id,
       })
       .then((res) => {
-        const { message } = res.data
-        toast.success(message)
-        getAllData()
-        setEducation(initialData)
+        const { message } = res.data;
+        toast.success(message);
+        getAllData();
+        setEducation(initialData);
       })
       .catch((err) => {
         if (err instanceof AxiosError) {
-          toast.error(err.response.data.message)
+          toast.error(err.response.data.message);
         } else {
-          toast.error('Error desconocido. Intente más tarde.')
+          toast.error("Error desconocido. Intente más tarde.");
         }
-      })
-  }
+      });
+  };
 
   useEffect(() => {
-    getAllData()
-  }, [])
+    getAllData();
+  }, []);
   return (
     <main className="flex flex-col">
       <div className="w-full max-w-[1000px] flex flex-col">
@@ -107,7 +132,21 @@ const EducationTab = () => {
               <input
                 type="text"
                 name="institution"
+                minLength={15}
+                maxLength={60}
                 onChange={handleChange}
+                onBlur={(e) => {
+                  const textoLimpio = e.target.value.replace(
+                    /[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g,
+                    ""
+                  );
+                  handleChange({
+                    target: {
+                      name: e.target.name,
+                      value: textoLimpio,
+                    },
+                  });
+                }}
                 value={education.institution}
                 className="h-[60px] px-2 bg-gray-200 border border-gray-200 rounded-lg outline-none"
               />
@@ -119,8 +158,22 @@ const EducationTab = () => {
               <input
                 type="text"
                 name="degree"
+                minLength={15}
+                maxLength={60}
                 value={education.degree}
                 onChange={handleChange}
+                onBlur={(e) => {
+                  const textoLimpio = e.target.value.replace(
+                    /[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g,
+                    ""
+                  );
+                  handleChange({
+                    target: {
+                      name: e.target.name,
+                      value: textoLimpio,
+                    },
+                  });
+                }}
                 className="h-[60px] px-2 bg-gray-200 border border-gray-200 rounded-lg outline-none"
               />
             </div>
@@ -132,8 +185,22 @@ const EducationTab = () => {
             <input
               type="text"
               name="fieldOfStudy"
+              minLength={5}
+              maxLength={25}
               value={education.fieldOfStudy}
               onChange={handleChange}
+              onBlur={(e) => {
+                const textoLimpio = e.target.value.replace(
+                  /[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g,
+                  ""
+                );
+                handleChange({
+                  target: {
+                    name: e.target.name,
+                    value: textoLimpio,
+                  },
+                });
+              }}
               className="h-[60px] px-2 bg-gray-200 border border-gray-200 rounded-lg outline-none"
             />
           </div>
@@ -210,7 +277,7 @@ const EducationTab = () => {
                     <td className="px-6 py-4">{edu.degree}</td>
                     <td className="px-6 py-4">{edu.fieldOfStudy}</td>
                     <td className="px-6 py-4">{edu.startYear}</td>
-                    <td className="px-6 py-4">{edu.endYear || 'En curso'}</td>
+                    <td className="px-6 py-4">{edu.endYear || "En curso"}</td>
 
                     <td className="px-6 py-4 text-right">
                       <button
@@ -229,7 +296,7 @@ const EducationTab = () => {
       </div>
       <Toaster richColors />
     </main>
-  )
-}
+  );
+};
 
-export default EducationTab
+export default EducationTab;

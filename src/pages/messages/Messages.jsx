@@ -1,144 +1,149 @@
-import { useEffect } from 'react'
-import { useSelector } from 'react-redux'
-import { useNavigate, useParams } from 'react-router-dom'
-import { messageApi } from '../../api/index.api'
-import { useState } from 'react'
-import { GoArrowLeft } from 'react-icons/go'
-import { IoIosSend } from 'react-icons/io'
+import { useEffect } from "react";
+import { useSelector } from "react-redux";
+import { useNavigate, useParams } from "react-router-dom";
+import { messageApi } from "../../api/index.api";
+import { useState } from "react";
+import { GoArrowLeft } from "react-icons/go";
+import { IoIosSend } from "react-icons/io";
 
-import { IoSearch } from 'react-icons/io5'
-import { dateUtil, storageUtil } from '../../utils/index.utils'
-import { useRef } from 'react'
-import { RiRefreshLine } from 'react-icons/ri'
+import { IoSearch } from "react-icons/io5";
+import { dateUtil, storageUtil } from "../../utils/index.utils";
+import { useRef } from "react";
+import { RiRefreshLine } from "react-icons/ri";
 
 const Messages = () => {
-  const navigate = useNavigate()
-  const [text, setText] = useState('')
-  const messagesEndRef = useRef(null)
-  const [showModal, setShowModal] = useState(false)
+  const navigate = useNavigate();
+  const [text, setText] = useState("");
+  const messagesEndRef = useRef(null);
+  const [showModal, setShowModal] = useState(false);
   const [userConversation, setUserConversation] = useState({
-    fullName: '',
-    role: '',
-  })
-  const { senderId, receiverId } = useParams()
-  const { info } = useSelector((state) => state.user)
-  const [conversation, setConversation] = useState([])
-  const [conversations, setConversations] = useState([])
+    fullName: "",
+    role: "",
+  });
+  const { senderId, receiverId } = useParams();
+  const { info } = useSelector((state) => state.user);
+  const [conversation, setConversation] = useState([]);
+  const [conversations, setConversations] = useState([]);
+  const [auxConversations, setAuxConversations] = useState([]);
+  const [conversationsArr, setConversationsArr] = useState([]);
+  const [auxConversationsArr, setAuxConversationsArr] = useState([]);
 
-  const [conversationsArr, setConversationsArr] = useState([])
-
-  const toggleShowModal = () => setShowModal((prev) => !prev)
+  const toggleShowModal = () => setShowModal((prev) => !prev);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
   const handleChange = (e) => {
-    const { value } = e.target
-    setText(value)
-  }
+    const { value } = e.target;
+    setText(value);
+  };
 
   const sendMessage = () => {
-    const { token } = storageUtil.getData('session')
+    const { token } = storageUtil.getData("session");
 
     if (text.length > 0) {
       const newMessage = {
         SenderId: receiverId,
         ReceiverId: senderId,
         text: text,
-      }
+      };
 
-      const newConversation = [...conversation, newMessage]
-      setConversation(newConversation)
+      const newConversation = [...conversation, newMessage];
+      setConversation(newConversation);
 
       messageApi.sendMessage(token, newMessage).then((res) => {
-        setText('')
+        setText("");
 
         messageApi.getMyMessages(info.id).then((res) => {
-          const { conversations } = res.data
-          setConversations(conversations)
-          const grouped = groupMessagesByUser(conversations, info.id)
-          setConversationsArr(grouped)
-        })
-      })
+          const { conversations } = res.data;
+          setConversations(conversations);
+          setAuxConversations(conversations);
+          const grouped = groupMessagesByUser(conversations, info.id);
+          setConversationsArr(grouped);
+          setAuxConversationsArr(grouped);
+        });
+      });
     }
-  }
+  };
 
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault()
-      sendMessage()
+    if (e.key === "Enter") {
+      e.preventDefault();
+      sendMessage();
     }
-  }
+  };
 
   const getConversations = () => {
     messageApi.getMyMessages(info.id).then((res) => {
-      const { conversations } = res.data
-      setConversations(conversations)
-      const grouped = groupMessagesByUser(conversations, info.id)
-      setConversationsArr(grouped)
-    })
-  }
+      const { conversations } = res.data;
+      setConversations(conversations);
+      setAuxConversations(conversations);
+      const grouped = groupMessagesByUser(conversations, info.id);
+      setConversationsArr(grouped);
+      setAuxConversationsArr(grouped);
+    });
+  };
 
   const reloadMessages = () => {
-    getConversations()
-  }
+    getConversations();
+  };
 
   const markAsRead = () => {
-    const { token } = storageUtil.getData('session')
+    const { token } = storageUtil.getData("session");
     messageApi.markAsRead(token, senderId, info.id).then((res) => {
-      getConversations()
-    })
-  }
+      getConversations();
+    });
+  };
 
   const openConversation = (senderId, name, role) => {
-    const { token } = storageUtil.getData('session')
+    const { token } = storageUtil.getData("session");
 
     setUserConversation(() => ({
       fullName: name,
       role: role,
-    }))
+    }));
 
     messageApi.markAsRead(token, senderId, info.id).then((res) => {
-      getConversations()
-    })
+      getConversations();
+    });
 
-    navigate(`/messages/${senderId}/${info.id}`)
-    toggleShowModal()
-  }
+    navigate(`/messages/${senderId}/${info.id}`);
+    toggleShowModal();
+  };
 
   // Agrupar mensaje
   const groupMessagesByUser = (messages, currentUserId) => {
-    const grouped = {}
+    const grouped = {};
 
     messages.forEach((msg) => {
-      const isIncoming = msg.ReceiverId === currentUserId
+      const isIncoming = msg.ReceiverId === currentUserId;
       const otherUser =
-        msg.SenderId === currentUserId ? msg.Receiver : msg.Sender
+        msg.SenderId === currentUserId ? msg.Receiver : msg.Sender;
 
       if (!grouped[otherUser.id]) {
         grouped[otherUser.id] = {
           user: otherUser,
           lastMessage: msg,
           unreadCount: 0,
-        }
+        };
       }
 
       // Contar si es un mensaje entrante no leído
       if (isIncoming && !msg.isRead) {
-        grouped[otherUser.id].unreadCount += 1
+        grouped[otherUser.id].unreadCount += 1;
       }
 
       // Actualizar último mensaje si es más reciente
-      const existingTime = new Date(grouped[otherUser.id].lastMessage.senderAt)
-      const newTime = new Date(msg.senderAt)
+      const existingTime = new Date(grouped[otherUser.id].lastMessage.senderAt);
+      const newTime = new Date(msg.senderAt);
       if (newTime > existingTime) {
-        grouped[otherUser.id].lastMessage = msg
+        grouped[otherUser.id].lastMessage = msg;
       }
-    })
+    });
 
-    return Object.values(grouped)
-  }
+    return Object.values(grouped);
+  };
 
   useEffect(() => {
     if (senderId && receiverId) {
@@ -146,75 +151,54 @@ const Messages = () => {
         (c) =>
           (c.SenderId === senderId && c.ReceiverId === receiverId) ||
           (c.SenderId === receiverId && c.ReceiverId === senderId)
-      )
-      setConversation(conversation)
+      );
+      setConversation(conversation);
     }
-  }, [conversations])
+  }, [conversations]);
 
   useEffect(() => {
-    scrollToBottom()
-  }, [conversation])
+    scrollToBottom();
+  }, [conversation]);
 
   useEffect(() => {
     messageApi.getMyMessages(info.id).then((res) => {
-      const { conversations } = res.data
-      setConversations(conversations)
-      const grouped = groupMessagesByUser(conversations, info.id)
-      setConversationsArr(grouped)
-    })
+      const { conversations } = res.data;
+      setConversations(conversations);
+      setAuxConversations(conversations);
+      const grouped = groupMessagesByUser(conversations, info.id);
+      setConversationsArr(grouped);
+      setAuxConversationsArr(grouped);
+    });
 
     if (senderId && receiverId) {
       const conversation = conversations.filter(
         (c) =>
           (c.SenderId === senderId && c.ReceiverId === receiverId) ||
           (c.SenderId === receiverId && c.ReceiverId === senderId)
-      )
-      setConversation(conversation)
+      );
+      setConversation(conversation);
     }
-  }, [senderId, receiverId])
+  }, [senderId, receiverId]);
+
   return (
     <>
-      {' '}
+      {" "}
       <main
         className={`lg:w-[1400px] h-full w-full mx-auto flex flex-col mt-2 bg-white rounded-lg border border-gray-200  `}
       >
         {/* Header */}
         <header className="w-full flex lg:flex-row flex-col lg:gap-5 items-center lg:px-10 px-5 lg:h-[70px] border border-gray-200 lg:py-0 py-5">
           <h2 className="text-lg font-bold">Mensajes</h2>
-          {/* Buscador */}
-          <div
-            className="bg-gray-100 h-[40px] lg:w-[300px] w-full
-         border border-gray-200 rounded-lg flex flex-row"
-          >
-            <div className="w-[40px] h-full flex justify-center items-center">
-              <IoSearch size={18} />
-            </div>
-            <input
-              type="text"
-              placeholder="Buscar mensajes"
-              className="w-full h-full outline-none px-2 text-sm"
-            />
-          </div>
         </header>
-
-        {/* Filtros */}
-        <div className="w-full h-[50px] border-b border-gray-200 flex flex-row items-center gap-2 px-10">
-          <button className="h-[30px] px-5 rounded-full bg-[#fd6c01] text-white text-sm font-bold cursor-pointer hover:bg-[#cb4d03] transition-all duration-300">
-            Todos
-          </button>
-          <button className="h-[30px] px-5 rounded-full text-sm font-bold border border-gray-300 text-gray-500 hover:bg-gray-100 hover:border-gray-400 transition-all duration-300 cursor-pointer">
-            No leídos
-          </button>
-        </div>
 
         {/* Inbox */}
         <section className="w-full flex flex-row lg:h-[700px]">
           <aside className="lg:w-[350px] w-full h-full bg-white flex flex-col border-r border-gray-200 overflow-y-auto">
             {/* Mensajes */}
-            {conversationsArr.map((cnv) => (
+            {auxConversationsArr.map((cnv) => (
               <article
                 className={`border-b border-gray-200 relative flex flex-row gap-2 items-start px-5 py-5 cursor-pointer hover:bg-gray-100 transition-all duration-300 ${
-                  cnv.unreadCount > 0 && 'bg-gray-100'
+                  cnv.unreadCount > 0 && "bg-gray-100"
                 }`}
                 onClick={() =>
                   openConversation(
@@ -229,7 +213,7 @@ const Messages = () => {
                   src={
                     cnv.user.profilePicture
                       ? cnv.user.profilePicture
-                      : '/user.png'
+                      : "/user.png"
                   }
                   alt="Foto de perfil"
                   className="w-[56px] h-[56px] rounded-full"
@@ -241,8 +225,8 @@ const Messages = () => {
                   {/* Mensaje de truncamiento */}
                   <p className="text-sm text-gray-600 truncate max-w-[200px]">
                     {cnv.lastMessage.Sender.id === info.id
-                      ? 'Tú'
-                      : cnv.lastMessage.Sender.fullName.split(' ')[0]}
+                      ? "Tú"
+                      : cnv.lastMessage.Sender.fullName.split(" ")[0]}
                     : {cnv.lastMessage.text}
                   </p>
 
@@ -293,7 +277,7 @@ const Messages = () => {
                           <span>{cnv.text}</span>
                         </div>
                       </div>
-                    )
+                    );
                   } else {
                     return (
                       <div className="flex flex-row gap-3 items-center justify-start">
@@ -301,7 +285,7 @@ const Messages = () => {
                           src={
                             cnv.Sender.profilePicture
                               ? cnv.Sender.profilePicture
-                              : '/user.png'
+                              : "/user.png"
                           }
                           alt="Foto de perfil"
                           className="w-[56px] h-[56px] rounded-full"
@@ -310,7 +294,7 @@ const Messages = () => {
                           <span className="text-sm">{cnv.text}</span>
                         </div>
                       </div>
-                    )
+                    );
                   }
                 })}
 
@@ -337,7 +321,7 @@ const Messages = () => {
       {showModal && (
         <div
           className={`lg:hidden absolute w-full h-screen top-0 left-0 bg-white z-50 ${
-            showModal ? 'translate-y-0' : 'translate-y-full'
+            showModal ? "translate-y-0" : "translate-y-full"
           } transition-all duration-300 flex flex-col`}
         >
           <header className="px-5 py-3 flex flex-row items-center gap-5 border border-gray-200">
@@ -358,7 +342,7 @@ const Messages = () => {
                         <span>{cnv.text}</span>
                       </div>
                     </div>
-                  )
+                  );
                 } else {
                   return (
                     <div className="flex flex-row gap-3 items-center justify-start">
@@ -366,7 +350,7 @@ const Messages = () => {
                         src={
                           cnv.Sender.profilePicture
                             ? cnv.Sender.profilePicture
-                            : '/user.png'
+                            : "/user.png"
                         }
                         alt="Foto de perfil"
                         className="w-[56px] h-[56px] rounded-full"
@@ -375,7 +359,7 @@ const Messages = () => {
                         <span className="text-sm">{cnv.text}</span>
                       </div>
                     </div>
-                  )
+                  );
                 }
               })}
             <div ref={messagesEndRef} />
@@ -403,7 +387,7 @@ const Messages = () => {
         </div>
       )}
     </>
-  )
-}
+  );
+};
 
-export default Messages
+export default Messages;

@@ -1,106 +1,106 @@
-import { useEffect } from 'react'
-import { IoSearch } from 'react-icons/io5'
-import { jobOffersApi } from '../../../api/index.api'
-import { storageUtil } from '../../../utils/index.utils'
-import { useState } from 'react'
-import { AxiosError } from 'axios'
-import { toast, Toaster } from 'sonner'
-import Swal from 'sweetalert2'
-import { NewOfferModal } from '../../../components/index.components.js'
-import { useSelector } from 'react-redux'
+import { useEffect } from "react";
+import { IoSearch } from "react-icons/io5";
+import { jobOffersApi } from "../../../api/index.api";
+import { storageUtil } from "../../../utils/index.utils";
+import { useState } from "react";
+import { AxiosError } from "axios";
+import { toast, Toaster } from "sonner";
+import Swal from "sweetalert2";
+import { NewOfferModal } from "../../../components/index.components.js";
+import { useSelector } from "react-redux";
 
 const Offers = () => {
-  const { info } = useSelector((state) => state.user)
-  const [showModal, setShowModal] = useState(false)
+  const { info } = useSelector((state) => state.user);
+  const [success, setSuccess] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const toggleModal = () => {
-    setShowModal((prev) => !prev)
-  }
-  const [offers, setOffers] = useState([])
+    setShowModal((prev) => !prev);
+  };
+  const [offers, setOffers] = useState([]);
 
   const deleteOffer = (id) => {
     Swal.fire({
-      title: '¿Estás seguro?',
-      text: '¡No podrás revertir esto!',
-      icon: 'warning',
+      title: "¿Estás seguro?",
+      text: "¡No podrás revertir esto!",
+      icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Si, eliminar',
-      cancelButtonText: 'Cancelar',
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Si, eliminar",
+      cancelButtonText: "Cancelar",
     }).then((res) => {
       if (res.isConfirmed) {
-        const { token } = storageUtil.getData('session')
+        const { token } = storageUtil.getData("session");
 
         jobOffersApi
           .delete(token, id)
           .then((res) => {
-            const { message } = res.data
-            toast.success(message)
-            setOffers((prev) => prev.filter((offer) => offer.id !== id))
+            const { message } = res.data;
+            toast.success(message);
+            setOffers((prev) => prev.filter((offer) => offer.id !== id));
           })
           .catch((err) => {
             if (err instanceof AxiosError) {
-              toast.error(err.response.data.message)
+              toast.error(err.response.data.message);
             } else {
-              toast.error('Error desconocido. Intente más tarde.')
+              toast.error("Error desconocido. Intente más tarde.");
             }
-          })
+          });
       }
-    })
-  }
+    });
+  };
+
+  const getOffers = () => {
+    const { token } = storageUtil.getData("session");
+    if (info.role === "Administrador") {
+      jobOffersApi.getAll(token).then((res) => {
+        const { jobOffers } = res.data;
+        setOffers(jobOffers);
+      });
+    } else {
+      jobOffersApi.getByEmployeeId(token, info.id).then((res) => {
+        const { jobOffers } = res.data;
+        setOffers(jobOffers);
+      });
+    }
+  };
 
   useEffect(() => {
     if (showModal) {
-      document.body.style.overflow = 'hidden'
-      window.scrollTo({ top: 0, behavior: 'smooth' }) // 👈 esto hace scroll al top suavemente
+      document.body.style.overflow = "hidden";
+      window.scrollTo({ top: 0, behavior: "smooth" }); // 👈 esto hace scroll al top suavemente
     } else {
-      document.body.style.overflow = 'auto'
+      document.body.style.overflow = "auto";
     }
 
     // Limpieza por si acaso
     return () => {
-      document.body.style.overflow = 'auto'
-    }
-  }, [showModal])
+      document.body.style.overflow = "auto";
+    };
+  }, [showModal]);
 
   useEffect(() => {
-    const { token } = storageUtil.getData('session')
-    if (info.role === 'Administrador') {
-      jobOffersApi.getAll(token).then((res) => {
-        const { jobOffers } = res.data
-        setOffers(jobOffers)
-      })
-    } else {
-      jobOffersApi.getByEmployeeId(token, info.id).then((res) => {
-        const { jobOffers } = res.data
-        setOffers(jobOffers)
-      })
+    if (success) {
+      getOffers();
+      setSuccess(false);
     }
-  }, [])
+  }, [success]);
+
+  useEffect(() => {
+    getOffers();
+  }, []);
   return (
     <main
       className={`w-full  flex lg:px-10   md:px-5 px-2 flex-col ${
         showModal
-          ? 'lg:py-0 overflow-y-hidden h-screen'
-          : 'py-20 lg:py-10 h-full'
+          ? "lg:py-0 overflow-y-hidden h-screen"
+          : "py-20 lg:py-10 h-full"
       }`}
     >
       <h2 className="text-3xl font-bold">Ofertas Laborales</h2>
       {/* Seccion busqueda y agregar */}
-      <section className="w-full flex flex-row items-center justify-between mt-5">
+      <section className="w-full flex flex-row items-center justify-end mt-5">
         {/* Busqueda */}
-        <div className="bg-white h-[50px] w-[400px] border border-gray-200 rounded-lg flex flex-row">
-          <input
-            type="text"
-            name="search"
-            id="search"
-            placeholder="Buscar oferta"
-            className="flex-1 h-full outline-none px-5 text-gray-400"
-          />
-          <div className="w-[70px] h-full flex justify-center items-center">
-            <IoSearch size={25} color="#d1d5dc" />
-          </div>
-        </div>
 
         <button
           className="bg-[#fd6c01] text-white px-5 py-2 rounded-lg font-bold cursor-pointer hover:bg-[#cb4d03] transition-all duration-300"
@@ -195,7 +195,7 @@ const Offers = () => {
                   <h2 className="font-bold text-lg">Publicada el</h2>
                   <div className="w-full h-[45px] bg-gray-100 border border-gray-200 flex px-2 flex-row items-center rounded-lg">
                     <span className="font-bold text-sm text-gray-400">
-                      {offer.createdAt.split('T')[0]}
+                      {offer.createdAt.split("T")[0]}
                     </span>
                   </div>
                 </div>
@@ -204,8 +204,8 @@ const Offers = () => {
                   <div className="w-full h-[45px] bg-gray-100 border border-gray-200 flex px-2 flex-row items-center rounded-lg">
                     <span className="font-bold text-sm text-gray-400">
                       {offer.expirationDate
-                        ? offer.expirationDate.split('T')[0]
-                        : 'Sin fecha de expiración'}
+                        ? offer.expirationDate.split("T")[0]
+                        : "Sin fecha de expiración"}
                     </span>
                   </div>
                 </div>
@@ -230,9 +230,13 @@ const Offers = () => {
       )}
 
       <Toaster richColors position="bottom-right" />
-      <NewOfferModal showModal={showModal} toggleModal={toggleModal} />
+      <NewOfferModal
+        showModal={showModal}
+        toggleModal={toggleModal}
+        setSuccess={setSuccess}
+      />
     </main>
-  )
-}
+  );
+};
 
-export default Offers
+export default Offers;

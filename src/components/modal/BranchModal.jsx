@@ -1,144 +1,158 @@
-import { useState } from 'react'
-import { RiCloseLine } from 'react-icons/ri'
-import { provinces } from '../../data/data'
-import { useEffect } from 'react'
-import { toast, Toaster } from 'sonner'
-import { branchApi } from '../../api/index.api'
-import { storageUtil } from '../../utils/index.utils'
-import { AxiosError } from 'axios'
-import Swal from 'sweetalert2'
+import { useState } from "react";
+import { RiCloseLine } from "react-icons/ri";
+import { provinces } from "../../data/data";
+import { useEffect } from "react";
+import { toast, Toaster } from "sonner";
+import { branchApi } from "../../api/index.api";
+import { storageUtil, validatorUtils } from "../../utils/index.utils";
+import { AxiosError } from "axios";
+import Swal from "sweetalert2";
 
-const BranchModal = ({ showModal, toggleModal, branchId }) => {
+const BranchModal = ({ showModal, toggleModal, branchId, getBranches }) => {
   const initialState = {
-    name: '',
-    address: '',
-    phone: '',
-    province: '',
-    city: '',
-    email: '',
+    name: "",
+    address: "",
+    phone: "",
+    province: "",
+    city: "",
+    email: "",
     isMain: false,
-  }
-  const [branch, setBranch] = useState(initialState)
-  const [province, setProvince] = useState('')
-  const [cities, setCities] = useState([])
+  };
+  const [branch, setBranch] = useState(initialState);
+  const [province, setProvince] = useState("");
+  const [cities, setCities] = useState([]);
 
   const handleClose = () => {
-    setBranch(initialState)
-    setProvince('')
-    setCities([])
-    toggleModal()
-  }
+    setBranch(initialState);
+    setProvince("");
+    setCities([]);
+    toggleModal();
+  };
 
   const handleProvince = (e) => {
-    const { value } = e.target
-    setProvince(value)
-    setCities(provinces[value])
+    const { value } = e.target;
+    setProvince(value);
+    setCities(provinces[value]);
     setBranch((prev) => ({
       ...prev,
       province: value,
-    }))
-  }
+    }));
+  };
 
   const handleChange = (e) => {
-    const { name, value } = e.target
+    const { name, value } = e.target;
     setBranch((prev) => ({
       ...prev,
       [name]: value,
-    }))
-  }
+    }));
+  };
 
   const handleSubmit = (e) => {
-    const { token } = storageUtil.getData('session')
-    e.preventDefault()
-    if (Object.values(branch).some((data) => data === '')) {
-      toast.error('Todos los campos son obligatorios')
-      return
+    const { token } = storageUtil.getData("session");
+    e.preventDefault();
+    if (Object.values(branch).some((data) => data === "")) {
+      toast.error("Todos los campos son obligatorios");
+      return;
+    }
+
+    if (!validatorUtils.isValidPhone(branch.phone.toString())) {
+      toast.error("Telefono no valido");
+      return;
+    }
+
+    if (!validatorUtils.isValidEmail(branch.email)) {
+      toast.error("Correo no valido");
+      return;
     }
 
     if (!branchId) {
       branchApi
         .save(token, branch)
         .then((res) => {
-          const { message } = res.data
-          toast.success(message)
+          const { message } = res.data;
+          toast.success(message);
           setBranch({
-            name: '',
-            address: '',
-            email: '',
-            phone: '',
-            province: '',
-            city: '',
+            name: "",
+            address: "",
+            email: "",
+            phone: "",
+            province: "",
+            city: "",
             isMain: false,
-          })
-          setProvince('')
-          setCities([])
+          });
+          setProvince("");
+          setCities([]);
 
           setTimeout(() => {
-            toggleModal()
-          }, 2500)
+            getBranches();
+            toggleModal();
+          }, 2500);
         })
         .catch((err) => {
           if (err instanceof AxiosError) {
-            toast.error(err.response.data.message)
+            toast.error(err.response.data.message);
           } else {
-            toast.error('Error desconocido. Intente más tarde.')
+            toast.error("Error desconocido. Intente más tarde.");
           }
-        })
+        });
     } else {
       branchApi
         .update(token, branch, branchId)
         .then((res) => {
-          const { message } = res.data
-          toast.success(message)
+          const { message } = res.data;
+          toast.success(message);
           setTimeout(() => {
-            toggleModal()
-          }, 2500)
+            getBranches();
+
+            toggleModal();
+          }, 2500);
         })
         .catch((err) => {
           if (err instanceof AxiosError) {
-            toast.error(err.response.data.message)
+            toast.error(err.response.data.message);
           } else {
-            toast.error('Error desconocido. Intente más tarde.')
+            toast.error("Error desconocido. Intente más tarde.");
           }
-        })
+        });
     }
-  }
+  };
 
   const handleMain = (e) => {
-    const { checked } = e.target
+    const { checked } = e.target;
     setBranch((prev) => ({
       ...prev,
       isMain: checked,
-    }))
-  }
+    }));
+  };
 
   useEffect(() => {
     if (branchId) {
-      const { token } = storageUtil.getData('session')
+      const { token } = storageUtil.getData("session");
       branchApi
         .getById(token, branchId)
         .then((res) => {
-          const { branch } = res.data
-          setBranch(branch)
-          setProvince(branch.province)
-          setCities(provinces[branch.province])
+          const { branch } = res.data;
+          console.log(branch);
+          setBranch(branch);
+          setProvince(branch.province);
+          setCities(provinces[branch.province]);
         })
         .catch((err) => {
           if (err instanceof AxiosError) {
-            toast.error(err.response.data.message)
+            toast.error(err.response.data.message);
           } else {
-            toast.error('Error desconocido. Intente más tarde.')
+            toast.error("Error desconocido. Intente más tarde.");
           }
-        })
+        });
     } else {
-      setBranch(initialState)
+      setBranch(initialState);
     }
-  }, [branchId])
+  }, [branchId]);
 
   return (
     <div
       className={`${
-        showModal ? 'block' : 'hidden'
+        showModal ? "block" : "hidden"
       } absolute top-0 left-0 w-full h-full bg-black/50 z-50 flex justify-center items-center lg:px-0 px-5`}
     >
       <div className="lg:w-[800px] w-full h-fit bg-white border border-gray-200 rounded-lg overflow-hidden z-50">
@@ -162,6 +176,8 @@ const BranchModal = ({ showModal, toggleModal, branchId }) => {
                 <input
                   type="text"
                   name="name"
+                  minLength={5}
+                  maxLength={50}
                   value={branch.name}
                   onChange={handleChange}
                   className="w-full bg-gray-100 rounded-lg h-[50px] border border-gray-300 px-5 outline-none"
@@ -176,8 +192,17 @@ const BranchModal = ({ showModal, toggleModal, branchId }) => {
                   <input
                     type="tel"
                     name="phone"
+                    pattern="[0-9]{10}"
+                    maxLength={10}
                     value={branch.phone}
-                    onChange={handleChange}
+                    onChange={(e) => {
+                      const { value } = e.target;
+                      if (isNaN(value)) {
+                        e.target.value = "";
+                        return;
+                      }
+                      handleChange(e);
+                    }}
                     className="w-full bg-gray-100 rounded-lg h-[50px] border border-gray-300 px-5 outline-none"
                   />
                 </div>
@@ -188,6 +213,7 @@ const BranchModal = ({ showModal, toggleModal, branchId }) => {
                   <input
                     type="email"
                     name="email"
+                    placeholder="exampe@gmail.com"
                     value={branch.email}
                     onChange={handleChange}
                     className="w-full bg-gray-100 rounded-lg h-[50px] border border-gray-300 px-5 outline-none"
@@ -206,7 +232,7 @@ const BranchModal = ({ showModal, toggleModal, branchId }) => {
                     onChange={handleProvince}
                     className="outline-none h-[50px] bg-gray-100 rounded-lg px-2 border border-gray-300"
                   >
-                    <option selected={branch.province === ''}>
+                    <option selected={branch.province === ""}>
                       Elija la provincia
                     </option>
                     {Object.keys(provinces).map((province) => (
@@ -224,13 +250,13 @@ const BranchModal = ({ showModal, toggleModal, branchId }) => {
                     Ciudad
                   </label>
                   <select
-                    disabled={province === ''}
+                    disabled={province === ""}
                     id="city"
                     name="city"
                     onChange={handleChange}
                     className="outline-none h-[50px] bg-gray-100 rounded-lg px-2 border border-gray-300 disabled:cursor-not-allowed"
                   >
-                    <option selected={branch.city === ''}>
+                    <option selected={branch.city === ""}>
                       Elija el cantón
                     </option>
                     {cities.map((city) => (
@@ -248,6 +274,8 @@ const BranchModal = ({ showModal, toggleModal, branchId }) => {
                 </label>
                 <input
                   type="text"
+                  minLength={10}
+                  maxLength={100}
                   onChange={handleChange}
                   value={branch.address}
                   name="address"
@@ -286,7 +314,7 @@ const BranchModal = ({ showModal, toggleModal, branchId }) => {
       </div>
       <Toaster richColors position="bottom-right" />
     </div>
-  )
-}
+  );
+};
 
-export default BranchModal
+export default BranchModal;

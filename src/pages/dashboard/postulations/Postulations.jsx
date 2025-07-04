@@ -1,282 +1,369 @@
-import { useEffect, useState } from 'react'
-import { useSelector } from 'react-redux'
-import { storageUtil } from '../../../utils/index.utils'
-import { hfAPI, postulationApi } from '../../../api/index.api'
-import { IoFilter } from 'react-icons/io5'
-import { RiEdit2Fill, RiEyeFill } from 'react-icons/ri'
-import { NavLink } from 'react-router-dom'
+import { useEffect } from "react";
+import { useState } from "react";
+import { useSelector } from "react-redux";
+import {
+  branchApi,
+  hfAPI,
+  jobOffersApi,
+  postulationApi,
+} from "../../../api/index.api";
+import { storageUtil } from "../../../utils/index.utils";
+import { IoFilter } from "react-icons/io5";
+import { RiCloseFill, RiEdit2Fill, RiEyeFill } from "react-icons/ri";
+import { NavLink } from "react-router-dom";
 import {
   OfferModal,
   PostulationModal,
-} from '../../../components/index.components'
+} from "../../../components/index.components";
 
 const Postulations = () => {
-  const { info } = useSelector((state) => state.user)
-  const [loading, setLoading] = useState(false)
-  const [jobOffer, setJobOffer] = useState({})
-  const [showModal, setShowModal] = useState(false)
-  const [currentPostulation, setCurrentPostulation] = useState({})
-  const [showPostulationModal, setShowPostulationModal] = useState(false)
-  const [groupedPostulations, setGroupedPostulations] = useState([])
-  const [message, setMessage] = useState(null)
+  const { info } = useSelector((state) => state.user);
+  const [status, setStatus] = useState("Todas");
+
+  const [branches, setBranches] = useState([]);
+  const [jobOffers, setJobOffers] = useState([]);
+
+  const [branch, setBranch] = useState(null);
+  const [jobOffer, setJobOffer] = useState(null);
+  const [dataJobOffer, setDataJobOffer] = useState(null);
+
+  const [postulations, setPostulations] = useState(null);
+  const [message, setMessage] = useState(null);
+
+  const [currentPostulation, setCurrentPostulation] = useState(null);
+  const [showPostulationModal, setShowPostulationModal] = useState(false);
+
+  const statusPostulations = [
+    {
+      name: "Pendiente",
+      value: "Pendiente",
+    },
+    {
+      name: "Aceptada",
+      value: "Aceptada",
+    },
+    {
+      name: "Rechazada",
+      value: "Rechazada",
+    },
+  ];
 
   const togglePostulationModal = () => {
-    setShowPostulationModal((prev) => !prev)
-  }
+    setShowPostulationModal((prev) => !prev);
+  };
 
+  const viewPostulation = (pst) => {
+    setCurrentPostulation(pst);
+    console.log(pst);
+    togglePostulationModal();
+  };
+
+  const [showModal, setShowModal] = useState(false);
   const toggleModal = () => {
-    setShowModal((prev) => !prev)
-  }
+    setShowModal((prev) => !prev);
+  };
 
-  const handleViewPostulation = (postulation) => {
-    setCurrentPostulation(postulation)
-    togglePostulationModal()
-  }
+  const viewJobOffer = (id) => {
+    const dataJobOffer = jobOffers.find((jobOffer) => jobOffer.id === id);
+    setDataJobOffer(dataJobOffer);
+    toggleModal();
+  };
 
-  const viewJobOffer = (jobOffer) => {
-    setJobOffer(jobOffer)
-    toggleModal()
-  }
+  const getBranches = () => {
+    branchApi.getAll().then((res) => {
+      const { branches } = res.data;
+      setBranches(branches);
+    });
+  };
 
-  const groupApplications = (applications) => {
-    const groupedByBranch = applications.reduce((acc, app) => {
-      const branchName = app.JobOffer.Branch.name
-      if (!acc[branchName]) acc[branchName] = []
-      acc[branchName].push(app)
-      return acc
-    }, {})
+  const getOffers = () => {
+    const { token } = storageUtil.getData("session");
+    jobOffersApi.geByBranchId(token, branch).then((res) => {
+      const { jobOffers: jobOffersDB } = res.data;
+      setJobOffers(jobOffersDB);
+    });
+  };
 
-    return Object.entries(groupedByBranch).map(([branchName, apps]) => {
-      const groupedByJobOffer = apps.reduce((acc, app) => {
-        const jobOfferId = app.JobOfferId
-        if (!acc[jobOfferId]) acc[jobOfferId] = []
-        acc[jobOfferId].push(app)
-        return acc
-      }, {})
+  const getPostulations = () => {
+    const { token } = storageUtil.getData("session");
+    postulationApi.getByJobOfferId(token, jobOffer).then((res) => {
+      const { postulations: postulationsDB } = res.data;
+      console.log(postulationsDB);
+      setPostulations(postulationsDB);
+    });
+  };
 
-      const offers = Object.entries(groupedByJobOffer).map(
-        ([jobOfferId, apps]) => ({
-          jobOfferId,
-          applications: apps,
-        })
-      )
+  const handleBranch = (e) => {
+    const { value } = e.target;
+    setBranch(value);
+  };
 
-      return {
-        branchName,
-        applications: offers,
-      }
-    })
-  }
+  const handleJobOffer = (e) => {
+    const { value } = e.target;
+    setJobOffer(value);
+  };
 
-  const filterWithIA = async (jobOffers, branchName, jobOfferId) => {
-    const { token } = storageUtil.getData('session')
-    const description = jobOffers[0].JobOffer.description
-    const requirements = jobOffers[0].JobOffer.requirements
-
-    const applicants = jobOffers.map((offer) => ({
-      id: offer.UserId,
-      cv: offer.User.Resumes[0].parsedResume,
-    }))
+  const filterWithIA = async () => {
+    const { token } = storageUtil.getData("session");
+    const jobOfferData = jobOffers.find((jb) => jb.id === jobOffer);
+    const { description, requirements, id } = jobOfferData;
+    const postulationsFound = postulations.filter(
+      (pst) => pst.JobOfferId === jobOffer
+    );
+    const applicants = postulationsFound.map((pst) => ({
+      id: pst.User.id,
+      cv: pst.User.Resume.parsedResume,
+    }));
 
     const data = {
+      JobOfferId: id,
       description,
       requirements,
       applicants,
-    }
-
-    setLoading(true)
-
+    };
     try {
-      const res = await hfAPI.evaluateApplicants(data, token)
-      const { filterApplicants } = res.data
-
+      const res = await hfAPI.evaluateApplicants(data, token);
+      const { filterApplicants } = await res.data;
       if (filterApplicants.length > 0) {
         setMessage(
-          `Luego de aplicar el proceso de filtrado mediante inteligencia artificial, se ha determinado que ${
+          `Luego de aplicar el proceso de filtrado mediante inteligencia artificial se ha determinado que ${
             filterApplicants.length
+          } ${filterApplicants.length === 1 ? "candidato" : "candidatos"} se ${
+            filterApplicants.length === 1 ? "considera" : "consideran"
           } ${
-            filterApplicants.length === 1 ? 'postulante' : 'postulantes'
-          } presentan un alto grado de compatibilidad con la propuesta de empleo. Por lo tanto, podrían avanzar a la siguiente etapa del proceso de selección para una evaluación más detallada.`
-        )
-        const filteredIds = filterApplicants.map((app) => app.id)
+            filterApplicants.length === 1 ? "apto" : "aptos"
+          } para la oferta de trabajo ya que ${
+            filterApplicants.length === 1 ? "presenta" : "presentan"
+          } un algo grado de compatibilidad con la propuesta de empleo. Por lo tanto podrían avanzar a la siguiente etapa del proceso de selección para una evaluación final y más detallada.`
+        );
 
-        const filteredJobOffers = jobOffers.filter((offer) =>
-          filteredIds.includes(offer.UserId)
-        )
+        console.log(filterApplicants);
 
-        const updatedGroupedPostulations = groupedPostulations.map((group) => {
-          if (group.branchName !== branchName) return group
-
-          const updatedApplications = group.applications.map((application) => {
-            if (application.jobOfferId !== jobOfferId) return application
-
-            return {
-              ...application,
-              applications: filteredJobOffers,
-            }
-          })
-
-          return {
-            ...group,
-            applications: updatedApplications,
-          }
-        })
-
-        setGroupedPostulations(updatedGroupedPostulations)
+        const filteredIds = filterApplicants.map((filt) => filt.id);
+        const filteredPostulations = postulations.filter((pst) =>
+          filteredIds.includes(pst.UserId)
+        );
+        setPostulations(filteredPostulations);
+      } else {
+        setMessage(
+          `No se ha determinado ningun candidato apto para la oferta de trabajo, por lo tanto no podrán avanzar a la siguiente etapa del proceso de selección para una evaluación final y más detallada. Todas las postulaciones han sido rechazadas automáticamente.`
+        );
       }
-    } catch (err) {
-      console.error('Error al filtrar con IA:', err)
-    } finally {
-      setLoading(false)
+    } catch (error) {
+      console.log(error);
     }
-  }
+  };
+
+  const handleStatusPostulations = (e) => {
+    const { token } = storageUtil.getData("session");
+    const { value } = e.target;
+    setStatus(value);
+    postulationApi.getByStatus(token, value, jobOffer).then((res) => {
+      const { jobApplications } = res.data;
+      setPostulations(jobApplications);
+    });
+  };
 
   useEffect(() => {
-    const { token } = storageUtil.getData('session')
-
-    if (info.role === 'Administrador') {
-      postulationApi
-        .getAll(token)
-        .then((res) => {
-          const { jobApplications } = res.data
-          const grouped = groupApplications(jobApplications)
-          setGroupedPostulations(grouped)
-        })
-        .catch((err) => {
-          console.error('Error al obtener postulaciones:', err)
-        })
+    if (jobOffer) {
+      getPostulations();
     }
-  }, [info])
+  }, [jobOffer]);
+
+  useEffect(() => {
+    if (branch) {
+      getOffers();
+    }
+  }, [branch]);
+
+  useEffect(() => {
+    getBranches();
+  }, [info]);
 
   return (
-    <main className="w-full h-full flex py-20 flex-col lg:px-10 md:px-5 px-2">
-      {groupedPostulations.map((pst) => (
-        <div
-          key={pst.branchName}
-          className="flex flex-col py-10 border-b border-gray-300"
+    <main className="w-full h-full flex lg:pt-10 pt-20 flex-col lg:px-10 md:px-5 px-2">
+      {/* Filtros */}
+      <div className="flex flex-col gap-2">
+        <h2 className="text-2xl font-bold">Sucursal</h2>
+        <select
+          name="branch"
+          id="branch"
+          className="w-full h-[50px] bg-white px-3 border border-gray-300 rounded-lg"
+          onChange={handleBranch}
         >
-          <h2 className="text-3xl font-bold">{pst.branchName}</h2>
+          <option selected disabled>
+            Seleccione una sucursal
+          </option>
+          {branches &&
+            branches.map((branch) => (
+              <option value={branch.id} key={branch.id}>
+                {branch.name}
+              </option>
+            ))}
+        </select>
+      </div>
 
-          {pst.applications.length > 0 ? (
-            <div className="mt-5 flex flex-col w-full items-start pb-10">
-              {pst.applications.map((app) => {
-                const jobOfferTitle = app.applications[0]?.JobOffer.title
+      <div className="flex flex-col gap-2 mt-5">
+        <h2 className="text-2xl font-bold">Oferta de trabajo</h2>
+        <select
+          name="branch"
+          id="branch"
+          className="w-full h-[50px] bg-white px-3 border border-gray-300 rounded-lg"
+          onChange={handleJobOffer}
+        >
+          <option selected disabled>
+            Seleccione una oferta de trabajo
+          </option>
+          {jobOffers &&
+            jobOffers.map((jbo) => (
+              <option value={jbo.id} key={jbo.id}>
+                {jbo.title}
+              </option>
+            ))}
+        </select>
+      </div>
 
-                return (
-                  <div
-                    key={app.jobOfferId}
-                    className="flex flex-col gap-2 w-full"
+      <div className="flex flex-col gap-2 mt-5">
+        <h2 className="text-2xl font-bold">Estado</h2>
+        <select
+          name="branch"
+          id="branch"
+          disabled={postulations === null}
+          className="w-full h-[50px] bg-white px-3 border border-gray-300 rounded-lg"
+          onChange={handleStatusPostulations}
+        >
+          <option selected value="Todas">
+            Todas
+          </option>
+          {postulations &&
+            statusPostulations.map((stp) => (
+              <option value={stp.value} key={stp.value}>
+                {stp.name}
+              </option>
+            ))}
+        </select>
+      </div>
+
+      {/* Listado de postulaciones */}
+      {postulations !== null &&
+        (postulations.length > 0 ? (
+          <div className="flex flex-col gap-2 mt-10">
+            {status === "Pendiente" && (
+              <button
+                className="flex flex-row items-center gap-2 bg-[#fd6c01] text-white px-5 py-2 rounded-lg hover:bg-[#cb4d03] transition-all duration-300 cursor-pointer w-fit"
+                onClick={filterWithIA}
+              >
+                <IoFilter />
+                <span>Filtrar candidatos</span>
+              </button>
+            )}
+
+            <div className="flex flex-row gap-3 justify-evenly mt-10 flex-wrap w-full mb-10 ">
+              {postulations.map((pst) => (
+                <article className="flex flex-col gap-2 px-5 py-10 border border-gray-200 bg-white rounded-lg w-[400px] justify-center items-center relative">
+                  <button
+                    className="absolute top-2 left-2 px-2 py-1 rounded-lg text-[#fd6c01] text-sm cursor-pointer hover:text-[#cb4d03] transition-all duration-300 hover:scale-110"
+                    onClick={() => viewPostulation(pst)}
                   >
-                    <div className="flex flex-col items-center justify-center gap-1">
-                      <h2 className="font-bold text-xl text-center">Oferta</h2>
-                      <h3 className="font-mono text-lg text-gray-700 mt-3">
-                        {jobOfferTitle}
-                      </h3>
-                    </div>
+                    <RiEdit2Fill size={20} />
+                  </button>
 
-                    <button
-                      className="flex flex-row items-center gap-2 bg-[#fd6c01] text-white px-5 py-2 rounded-lg hover:bg-[#cb4d03] transition-all duration-300 cursor-pointer w-fit"
-                      onClick={() =>
-                        filterWithIA(
-                          app.applications,
-                          pst.branchName,
-                          app.applications[0].JobOfferId
-                        )
-                      }
-                    >
-                      <IoFilter />
-                      <span>Filtrar candidatos</span>
-                    </button>
+                  <span
+                    className={`absolute top-2 right-2 px-2 py-1 rounded-lg text-white text-sm ${
+                      pst.status === "Pendiente"
+                        ? "bg-yellow-500"
+                        : pst.status === "Aceptada"
+                        ? "bg-green-600"
+                        : "bg-red-500"
+                    }`}
+                  >
+                    {pst.status}
+                  </span>
 
-                    <div className="flex flex-row gap-3 justify-evenly mt-10 flex-wrap w-full">
-                      {app.applications.map((apps) => (
-                        <article
-                          key={apps.id}
-                          className="flex flex-col gap-2 px-5 py-10 border border-gray-200 bg-white rounded-lg w-[400px] justify-center items-center relative"
-                        >
-                          <button
-                            className="absolute top-2 left-2 px-2 py-1 rounded-lg text-[#fd6c01] text-sm cursor-pointer hover:text-[#cb4d03] transition-all duration-300 hover:scale-110"
-                            onClick={() => handleViewPostulation(apps)}
-                          >
-                            <RiEdit2Fill size={20} />
-                          </button>
-
-                          <span className="absolute top-2 right-2 px-2 py-1 rounded-lg bg-[#fd6c01] text-white text-sm">
-                            {apps.status}
-                          </span>
-
-                          <img
-                            src={apps.User.profilePicture || '/user.png'}
-                            alt="Foto de perfil"
-                            className="w-[100px] h-[100px] rounded-full"
-                          />
-
-                          <h2 className="text-lg font-bold">
-                            {apps.User.fullName}
-                          </h2>
-
-                          <div className="flex flex-row items-center gap-1 w-full">
-                            {apps.User.Resumes.length > 0 && (
-                              <NavLink
-                                to={apps.User.Resumes[0].url}
-                                target="_blank"
-                                className="flex-1 bg-[#fd6c01] text-white px-3 py-2 rounded-lg hover:bg-[#cb4d03] transition-all duration-300 text-center"
-                              >
-                                Ver CV
-                              </NavLink>
-                            )}
-                            <NavLink
-                              to={`/perfil/${apps.User.id}`}
-                              target="_blank"
-                              className="flex-1 bg-[#fd6c01] text-white px-3 py-2 rounded-lg hover:bg-[#cb4d03] transition-all duration-300 text-center"
-                            >
-                              Ver perfil
-                            </NavLink>
-                          </div>
-
-                          <button
-                            className="flex flex-row items-center gap-2 bg-black text-white px-5 py-2 rounded-lg hover:bg-black/80 transition-all duration-300 cursor-pointer w-full text-center justify-center"
-                            onClick={() => viewJobOffer(apps.JobOffer)}
-                          >
-                            <span>Ver oferta</span>
-                            <RiEyeFill />
-                          </button>
-                        </article>
-                      ))}
-                    </div>
-
-                    {message && (
-                      <div className="px-10">
-                        <div className="h-fit bg-black  rounded-xl border border-gray-200 flex justify-center items-center px-5 py-10">
-                          <h2 className="text-lg font-mono text-white text-center">
-                            {message}
-                          </h2>
-                        </div>
-                      </div>
-                    )}
+                  <div className="w-[100px] h-[100px] rounded-full bg-white border border-gray-200 overflow-hidden">
+                    <img
+                      src={pst.User.profilePicture || "/user.png"}
+                      alt="Foto de perfil"
+                      className="w-[100px] h-[100px] rounded-full"
+                    />
                   </div>
-                )
-              })}
+
+                  <h2 className="text-lg font-bold">{pst.User.fullName}</h2>
+
+                  <div className="flex flex-row items-center gap-1 w-full">
+                    {pst.User.Resume && (
+                      <NavLink
+                        to={pst.User.Resume.url}
+                        target="_blank"
+                        className="flex-1 bg-[#fd6c01] text-white px-3 py-2 rounded-lg hover:bg-[#cb4d03] transition-all duration-300 text-center"
+                      >
+                        Ver CV
+                      </NavLink>
+                    )}
+                    <NavLink
+                      to={`/perfil/${pst.User.id}`}
+                      target="_blank"
+                      className="flex-1 bg-[#fd6c01] text-white px-3 py-2 rounded-lg hover:bg-[#cb4d03] transition-all duration-300 text-center"
+                    >
+                      Ver perfil
+                    </NavLink>
+                  </div>
+
+                  <button
+                    className="flex flex-row items-center gap-2 bg-black text-white px-5 py-2 rounded-lg hover:bg-black/80 transition-all duration-300 cursor-pointer w-full text-center justify-center"
+                    onClick={() => viewJobOffer(pst.JobOfferId)}
+                  >
+                    <span>Ver oferta</span>
+                    <RiEyeFill />
+                  </button>
+                </article>
+              ))}
             </div>
-          ) : (
-            <div className="mt-10 w-full h-fit py-10 flex flex-col justify-center items-center bg-white px-5 rounded-2xl border border-gray-200 shadow-xl shadow-gray-200">
+            {message && (
+              <div className="px-10">
+                <div className="h-fit bg-black  rounded-xl border border-gray-200 flex justify-center items-center px-5 py-12 relative">
+                  <button className="absolute top-3 right-3 cursor-pointer hover:scale-110 transition-all duration-300">
+                    <RiCloseFill
+                      size={30}
+                      color="red"
+                      onClick={() => setMessage("")}
+                    />
+                  </button>
+                  <h2 className="text-lg font-mono text-white text-center">
+                    {message}
+                  </h2>
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="flex flex-col gap-3">
+            <div className="mt-10 w-full h-fit py-10 flex flex-col justify-center items-center px-5 ">
               <img
                 src="/no-data.png"
                 alt="Imagen de vacío"
                 className="w-[100px]"
               />
               <h2 className="text-2xl mt-2 font-bold">
-                Esta sucursal no tiene postulaciones
+                Esta oferta no tiene postulaciones
               </h2>
             </div>
-          )}
-        </div>
-      ))}
+            {message && (
+              <div className="px-10">
+                <div className="h-fit bg-black  rounded-xl border border-gray-200 flex justify-center items-center px-5 py-10">
+                  <h2 className="text-lg font-mono text-white text-center">
+                    {message}
+                  </h2>
+                </div>
+              </div>
+            )}
+          </div>
+        ))}
 
       <OfferModal
         showModal={showModal}
         toggleModal={toggleModal}
-        jobOffer={jobOffer}
+        jobOffer={dataJobOffer}
       />
 
       {showPostulationModal && (
@@ -285,17 +372,8 @@ const Postulations = () => {
           togglePostulation={togglePostulationModal}
         />
       )}
-
-      {loading && (
-        <div className="absolute top-0 left-0 w-full h-screen flex flex-col justify-center items-center gap-2 z-50 overflow-hidden bg-black/80">
-          <div className="w-[30px] h-[30px] rounded-full border-4 border-white border-t-[#fd6c01] animate-spin"></div>
-          <h2 className="text-lg font-semibold text-white mt-3">
-            Filtrando postulaciones. Por favor espere...
-          </h2>
-        </div>
-      )}
     </main>
-  )
-}
+  );
+};
 
-export default Postulations
+export default Postulations;

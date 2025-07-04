@@ -1,90 +1,103 @@
-import { useEffect, useState } from 'react'
-import { toast, Toaster } from 'sonner'
-import { experienceApi } from '../../api/index.api'
-import { useSelector } from 'react-redux'
-import { MdDelete } from 'react-icons/md'
-import { RiEyeFill } from 'react-icons/ri'
-import { AxiosError } from 'axios'
-import { Responsibilities } from '../index.components'
+import { useEffect, useState } from "react";
+import { toast, Toaster } from "sonner";
+import { experienceApi } from "../../api/index.api";
+import { useSelector } from "react-redux";
+import { MdDelete } from "react-icons/md";
+import { RiEyeFill } from "react-icons/ri";
+import { AxiosError } from "axios";
+import { Responsibilities } from "../index.components";
 
 const WorkExperienceTab = () => {
-  const { info } = useSelector((state) => state.user)
-  const [isCurrentWork, setIsCurrentWork] = useState(false)
-  const [showModal, setShowModal] = useState(false)
-  const [text, setText] = useState('')
+  const { info } = useSelector((state) => state.user);
+  const [isCurrentWork, setIsCurrentWork] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [text, setText] = useState("");
   const toggleModal = () => {
-    setShowModal((prev) => !prev)
-  }
+    setShowModal((prev) => !prev);
+  };
 
   const viewResponsibilities = (responsabilities) => {
-    setText(responsabilities)
-    toggleModal()
-  }
+    setText(responsabilities);
+    toggleModal();
+  };
   const toggleCurrentWork = () => {
-    setIsCurrentWork((prev) => !prev)
+    setIsCurrentWork((prev) => !prev);
     setExperience((prev) => ({
       ...prev,
       isCurrentJob: !prev.isCurrentJob,
-    }))
-  }
+    }));
+  };
   const initialData = {
-    companyName: '',
-    jobTitle: '',
-    startDate: '',
+    companyName: "",
+    jobTitle: "",
+    startDate: "",
     isCurrentJob: false,
-    responsibilities: '',
-  }
+    responsibilities: "",
+  };
 
-  const [experience, setExperience] = useState(initialData)
+  const [experience, setExperience] = useState(initialData);
 
-  const [workExperiences, setWorkExperiences] = useState([])
+  const [workExperiences, setWorkExperiences] = useState([]);
 
   const deleteWorkExperience = (id) => {
     experienceApi
       .delete(id)
       .then((res) => {
-        const { message } = res.data
-        toast.success(message)
-        getAllData()
+        const { message } = res.data;
+        toast.success(message);
+        getAllData();
       })
       .catch((err) => {
         if (err instanceof AxiosError) {
-          toast.error(err.response.data.message)
+          toast.error(err.response.data.message);
         } else {
-          toast.error('Error desconocido. Intente más tarde.')
+          toast.error("Error desconocido. Intente más tarde.");
         }
-      })
-  }
+      });
+  };
 
   const handleDate = (e) => {
-    const { name, value } = e.target
-    const year = value.split('-')[0]
+    const name = e.target.name;
+    const value = e.target.value;
+    const selectedDate = new Date(value);
+    const today = new Date();
+
+    selectedDate.setHours(0, 0, 0, 0);
+    today.setHours(0, 0, 0, 0);
+
+    if (selectedDate > today) {
+      toast.error("La fecha no puede ser posterior a la actual");
+      e.target.value = "";
+      return;
+    }
+
+    const year = value.split("-")[0];
     setExperience((prev) => ({
       ...prev,
       [name]: year,
-    }))
-  }
+    }));
+  };
 
   const handleChange = (e) => {
-    const { name, value } = e.target
+    const { name, value } = e.target;
     setExperience((prev) => ({
       ...prev,
       [name]: value,
-    }))
-  }
+    }));
+  };
 
   const getAllData = () => {
     experienceApi.getByUserId(info.id).then((res) => {
-      const { userExperiences } = res.data
-      setWorkExperiences(userExperiences)
-    })
-  }
+      const { userExperiences } = res.data;
+      setWorkExperiences(userExperiences);
+    });
+  };
 
   const handleSave = () => {
-    console.log(experience)
-    if (Object.values(experience).some((educ) => educ === '')) {
-      toast.error('Todos los datos son obligatorios')
-      return
+    console.log(experience);
+    if (Object.values(experience).some((educ) => educ === "")) {
+      toast.error("Todos los datos son obligatorios");
+      return;
     }
 
     experienceApi
@@ -93,26 +106,26 @@ const WorkExperienceTab = () => {
         UserId: info.id,
       })
       .then((res) => {
-        const { message } = res.data
-        toast.success(message)
-        getAllData()
-        setExperience(initialData)
+        const { message } = res.data;
+        toast.success(message);
+        getAllData();
+        setExperience(initialData);
       })
       .catch((err) => {
         if (err instanceof AxiosError) {
-          toast.error(err.response.data.message)
+          toast.error(err.response.data.message);
         } else {
-          toast.error('Error desconocido. Intente más tarde.')
+          toast.error("Error desconocido. Intente más tarde.");
         }
-      })
-  }
+      });
+  };
 
   useEffect(() => {
-    getAllData()
-  }, [info])
+    getAllData();
+  }, [info]);
 
   return !showModal ? (
-    <main className={`flex flex-col ${showModal && 'overflow-x-scroll'}`}>
+    <main className={`flex flex-col ${showModal && "overflow-x-scroll"}`}>
       <div className="w-full max-w-[1000px] flex flex-col">
         <div className="flex flex-col gap-5">
           <div className="flex flex-col flex-1 gap-2">
@@ -122,7 +135,21 @@ const WorkExperienceTab = () => {
             <input
               type="text"
               name="companyName"
+              minLength={5}
+              maxLength={30}
               onChange={handleChange}
+              onBlur={(e) => {
+                const textoLimpio = e.target.value.replace(
+                  /[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g,
+                  ""
+                );
+                handleChange({
+                  target: {
+                    name: e.target.name,
+                    value: textoLimpio,
+                  },
+                });
+              }}
               value={experience.companyName}
               className="h-[60px] px-2 bg-gray-200 border border-gray-200 rounded-lg outline-none"
             />
@@ -134,7 +161,21 @@ const WorkExperienceTab = () => {
             <input
               type="text"
               name="jobTitle"
+              minLength={5}
+              maxLength={30}
               onChange={handleChange}
+              onBlur={(e) => {
+                const textoLimpio = e.target.value.replace(
+                  /[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g,
+                  ""
+                );
+                handleChange({
+                  target: {
+                    name: e.target.name,
+                    value: textoLimpio,
+                  },
+                });
+              }}
               value={experience.jobTitle}
               className="h-[60px] px-2 bg-gray-200 border border-gray-200 rounded-lg outline-none"
             />
@@ -239,9 +280,9 @@ const WorkExperienceTab = () => {
                     </th>
                     <td className="px-6 py-4">{wok.companyName}</td>
                     <td className="px-6 py-4">{wok.startDate}</td>
-                    <td className="px-6 py-4">{wok.endDate || '-'}</td>
+                    <td className="px-6 py-4">{wok.endDate || "-"}</td>
                     <td className="px-6 py-4">
-                      {wok.isCurrentJob ? 'Si' : 'No'}
+                      {wok.isCurrentJob ? "Si" : "No"}
                     </td>
                     <td className="px-6 py-4">
                       <button
@@ -273,7 +314,7 @@ const WorkExperienceTab = () => {
     </main>
   ) : (
     <Responsibilities text={text} toggleModal={toggleModal} />
-  )
-}
+  );
+};
 
-export default WorkExperienceTab
+export default WorkExperienceTab;

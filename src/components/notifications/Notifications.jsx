@@ -1,38 +1,35 @@
-import { useEffect } from 'react'
-import { GoDotFill } from 'react-icons/go'
-import { useSelector } from 'react-redux'
-import { NavLink, useNavigate } from 'react-router-dom'
-import { notificationApi } from '../../api/index.api'
-import { useState } from 'react'
-import { dateUtil, storageUtil } from '../../utils/index.utils'
-import { setNotifications } from '../../redux/slices/app.slice'
-import { useDispatch } from 'react-redux'
+import { useEffect } from "react";
+import { GoDotFill } from "react-icons/go";
+import { useSelector } from "react-redux";
+import { NavLink, useNavigate } from "react-router-dom";
+import { notificationApi } from "../../api/index.api";
+import { useState } from "react";
+import { dateUtil, storageUtil } from "../../utils/index.utils";
+import { setNotifications } from "../../redux/slices/app.slice";
+import { useDispatch } from "react-redux";
 
 const Notifications = ({ showNotifications, toggleShowNotifications }) => {
-  const navigate = useNavigate()
-  const [notificationsArr, setNotificationsArr] = useState([])
-  const { info } = useSelector((state) => state.user)
-  const dispatch = useDispatch()
+  const navigate = useNavigate();
+  const [notificationsArr, setNotificationsArr] = useState([]);
+  const { info } = useSelector((state) => state.user);
+  const dispatch = useDispatch();
 
   const markNotification = (id) => {
-    const { token } = storageUtil.getData('session')
+    const { token } = storageUtil.getData("session");
     notificationApi.markAsRead(id, token).then((res) => {
-      storageUtil.removeData('session')
+      storageUtil.removeData("session");
       setNotificationsArr((prev) =>
         prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
-      )
+      );
       dispatch(
         setNotifications(
           notificationsArr.map((n) =>
             n.id === id ? { ...n, isRead: true } : n
           )
         )
-      )
-      setTimeout(() => {
-        navigate('/inicio-sesion')
-      }, 2500)
-    })
-  }
+      );
+    });
+  };
 
   const createOfferNotification = (notification) => {
     return (
@@ -72,8 +69,8 @@ const Notifications = ({ showNotifications, toggleShowNotifications }) => {
           </div>
         )}
       </article>
-    )
-  }
+    );
+  };
   const createAccountNotification = (notification) => {
     return (
       <article
@@ -106,50 +103,50 @@ const Notifications = ({ showNotifications, toggleShowNotifications }) => {
           </div>
         )}
       </article>
-    )
-  }
+    );
+  };
 
   const markReadNotification = (id, type, relationId) => {
-    const { token } = storageUtil.getData('session')
-    toggleShowNotifications()
+    const { token } = storageUtil.getData("session");
+    toggleShowNotifications();
     notificationApi
       .markAsRead(id, token)
       .then((res) => {
         setNotificationsArr((prev) =>
           prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
-        )
+        );
         dispatch(
           setNotifications(
             notificationsArr.map((n) =>
               n.id === id ? { ...n, isRead: true } : n
             )
           )
-        )
+        );
       })
       .catch((err) => {
-        console.log(err)
+        console.log(err);
       })
       .finally(() => {
-        if (type === 'Offer') {
-          navigate(`/offers/${relationId}`)
+        if (type === "Offer") {
+          navigate(`/offers/${relationId}`);
         }
 
-        if (type === 'Postulation') {
-          navigate(`/applications/${relationId}`)
+        if (type === "Postulation") {
+          navigate(`/applications/${relationId}`);
         }
-      })
-  }
+      });
+  };
 
   useEffect(() => {
     notificationApi.getAllByUserId(info.id).then((res) => {
-      const { notifications } = res.data
-      setNotificationsArr(notifications)
-    })
-  }, [])
+      const { notifications } = res.data;
+      setNotificationsArr(notifications);
+    });
+  }, []);
   return (
     <div
       className={`absolute top-full right-0 h-[500px] bg-gray-100 border border-gray-200 w-[400px]  z-50 rounded-xl mt-1 flex flex-col ${
-        showNotifications ? 'block' : 'hidden'
+        showNotifications ? "block" : "hidden"
       } transition-all duration-300`}
     >
       {/* Sections Header */}
@@ -161,12 +158,12 @@ const Notifications = ({ showNotifications, toggleShowNotifications }) => {
         {notificationsArr && notificationsArr.length > 0 ? (
           notificationsArr.map((notification) => {
             switch (notification.notificationType) {
-              case 'Offer':
-                return createOfferNotification(notification)
-              case 'Account':
-                return createAccountNotification(notification)
+              case "Offer":
+                return createOfferNotification(notification);
+              case "Account":
+                return createAccountNotification(notification);
               default:
-                return createOfferNotification(notification)
+                return createOfferNotification(notification);
             }
           })
         ) : (
@@ -181,7 +178,7 @@ const Notifications = ({ showNotifications, toggleShowNotifications }) => {
   justify-center bg-white border-t border-gray-200"
         >
           <NavLink
-            to={'/notifications'}
+            to={"/notifications"}
             onClick={toggleShowNotifications}
             className="text-[#FD6C01] font-bold hover:text-[#ff850b] transition-all duration-300"
           >
@@ -190,7 +187,7 @@ const Notifications = ({ showNotifications, toggleShowNotifications }) => {
         </div>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default Notifications
+export default Notifications;

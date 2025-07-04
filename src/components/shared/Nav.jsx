@@ -2,174 +2,189 @@ import {
   BiChevronDown,
   BiMicrophone,
   BiSolidMessageRoundedDots,
-} from 'react-icons/bi'
-import { FaBriefcase, FaSearch } from 'react-icons/fa'
-import { GiHamburgerMenu } from 'react-icons/gi'
-import { IoIosNotifications } from 'react-icons/io'
+} from "react-icons/bi";
+import { FaBriefcase, FaSearch } from "react-icons/fa";
+import { GiHamburgerMenu } from "react-icons/gi";
+import { IoIosNotifications } from "react-icons/io";
 import {
   RiHome3Fill,
   RiMessage3Fill,
   RiNotification3Fill,
-} from 'react-icons/ri'
-import { TbMessageCircleFilled } from 'react-icons/tb'
-import { NavLink, useNavigate } from 'react-router-dom'
-import { Inbox, Notifications, Settings } from '../index.components'
-import { useState } from 'react'
-import { useSelector } from 'react-redux'
-import { useEffect } from 'react'
-import { storageUtil } from '../../utils/index.utils'
-import { useMemo } from 'react'
+} from "react-icons/ri";
+import { TbMessageCircleFilled } from "react-icons/tb";
+import { NavLink, useNavigate } from "react-router-dom";
+import { Inbox, Notifications, Settings } from "../index.components";
+import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useEffect } from "react";
+import { storageUtil } from "../../utils/index.utils";
+import { useMemo } from "react";
+import { setOffers, setFilteredOffers } from "../../redux/slices/app.slice";
 
 const Nav = ({ toggleShow }) => {
-  const { info } = useSelector((state) => state.user)
-  const navigate = useNavigate()
-  const { messages, notifications } = useSelector((state) => state.app)
-  const [unreadMessages, setUnreadMessages] = useState(0)
-  const [unreadNotifications, setUnreadNotifications] = useState(0)
+  const { info } = useSelector((state) => state.user);
+  const { offers } = useSelector((state) => state.app);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { messages, notifications } = useSelector((state) => state.app);
+  const [unreadMessages, setUnreadMessages] = useState(0);
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
 
-  const [currentBox, setCurrentBox] = useState(null)
-  const [showInbox, setShowInbox] = useState(false)
-  const [showNotifications, setShowNotifications] = useState(false)
-  const [showSettings, setShowSettings] = useState(false)
+  const [currentBox, setCurrentBox] = useState(null);
+  const [showInbox, setShowInbox] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
 
   const logout = () => {
-    navigate('/inicio-sesion')
-    storageUtil.removeData('session')
-    toggleShowSettings()
-  }
+    navigate("/inicio-sesion");
+    storageUtil.removeData("session");
+    toggleShowSettings();
+  };
 
   const toggleShowInbox = () => {
-    setShowInbox((prev) => !prev)
-    setShowNotifications(false)
-    setShowSettings(false)
-    setUnreadMessages(0)
+    setShowInbox((prev) => !prev);
+    setShowNotifications(false);
+    setShowSettings(false);
+    setUnreadMessages(0);
 
-    if (currentBox !== 'msg') setCurrentBox('msg')
-    else setCurrentBox(null)
-  }
+    if (currentBox !== "msg") setCurrentBox("msg");
+    else setCurrentBox(null);
+  };
 
   const toggleShowNotifications = () => {
-    setShowNotifications((prev) => !prev)
-    setShowInbox(false)
-    setShowSettings(false)
-    if (currentBox !== 'noti') setCurrentBox('noti')
-    else setCurrentBox(null)
-  }
+    setShowNotifications((prev) => !prev);
+    setShowInbox(false);
+    setShowSettings(false);
+    if (currentBox !== "noti") setCurrentBox("noti");
+    else setCurrentBox(null);
+  };
 
   const toggleShowSettings = () => {
-    setShowSettings((prev) => !prev)
-    setShowInbox(false)
-    setShowNotifications(false)
-    if (currentBox !== 'settings') setCurrentBox('settings')
-    else setCurrentBox(null)
-  }
+    setShowSettings((prev) => !prev);
+    setShowInbox(false);
+    setShowNotifications(false);
+    if (currentBox !== "settings") setCurrentBox("settings");
+    else setCurrentBox(null);
+  };
 
   useEffect(() => {
     const notificationsUnread = notifications.filter(
       (notification) => !notification.isRead
-    )
-    setUnreadNotifications(notificationsUnread.length)
+    );
+    setUnreadNotifications(notificationsUnread.length);
 
     const unreadConversationsCount = messages.filter(
       (cnv) => cnv.unreadCount > 0
-    ).length
-    setUnreadMessages(unreadConversationsCount)
-  }, [messages, notifications])
+    ).length;
+    setUnreadMessages(unreadConversationsCount);
+  }, [messages, notifications]);
 
   // Comandos de voz
-  const [isListening, setIsListening] = useState(false)
+  const [isListening, setIsListening] = useState(false);
 
   const recognition = useMemo(
     () => new (window.SpeechRecognition || window.webkitSpeechRecognition)(),
     []
-  )
+  );
 
-  recognition.lang = 'es-ES'
-  recognition.continuous = true
-  recognition.interimResults = false
+  recognition.lang = "es-ES";
+  recognition.continuous = true;
+  recognition.interimResults = false;
 
   useEffect(() => {
     recognition.onresult = (event) => {
       const transcript = event.results[event.results.length - 1][0].transcript
         .trim()
-        .toLowerCase()
+        .toLowerCase();
 
       if (
-        transcript === 'postulaciones' ||
-        transcript === 'mis postulaciones'
+        transcript === "postulaciones" ||
+        transcript === "mis postulaciones"
       ) {
-        navigate('/applications')
+        navigate("/applications");
       }
 
-      if (transcript === 'mensajes' || transcript === 'mis mensajes') {
-        navigate('/messages')
-      }
-
-      if (
-        transcript === 'notificaciones' ||
-        transcript === 'mis notificaciones'
-      ) {
-        navigate('/notifications')
+      if (transcript === "mensajes" || transcript === "mis mensajes") {
+        navigate("/messages");
       }
 
       if (
-        transcript === 'inicio' ||
-        transcript === 'home' ||
-        transcript === 'principal' ||
-        transcript === 'volver'
+        transcript === "notificaciones" ||
+        transcript === "mis notificaciones"
       ) {
-        navigate('/')
+        navigate("/notifications");
       }
 
       if (
-        transcript === 'perfil' ||
-        transcript === 'ver mi perfil' ||
-        transcript === 'ir al perfil'
+        transcript === "inicio" ||
+        transcript === "home" ||
+        transcript === "principal" ||
+        transcript === "volver"
       ) {
-        navigate(`/perfil/${info.id}`)
+        navigate("/");
       }
 
       if (
-        transcript === 'configuracion' ||
-        transcript === 'configuración' ||
-        transcript === 'configurar' ||
-        transcript === 'editar'
+        transcript === "perfil" ||
+        transcript === "ver mi perfil" ||
+        transcript === "ir al perfil"
       ) {
-        navigate(`/settings`)
+        navigate(`/perfil/${info.id}`);
       }
 
       if (
-        transcript === 'salir' ||
-        transcript === 'cerrar sesion' ||
-        transcript === 'cerrar sesión' ||
-        transcript === 'logout'
+        transcript === "configuracion" ||
+        transcript === "configuración" ||
+        transcript === "configurar" ||
+        transcript === "editar"
       ) {
-        recognition.stop()
-        setIsListening(false)
-        logout()
+        navigate(`/settings`);
       }
 
       if (
-        transcript === 'detener' ||
-        transcript === 'parar' ||
-        transcript === 'desactivar' ||
-        transcript === 'desactivar voz'
+        transcript === "salir" ||
+        transcript === "cerrar sesion" ||
+        transcript === "cerrar sesión" ||
+        transcript === "logout"
       ) {
-        recognition.stop()
-        setIsListening(false)
+        recognition.stop();
+        setIsListening(false);
+        logout();
       }
-    }
-  }, [recognition])
+
+      if (
+        transcript === "detener" ||
+        transcript === "parar" ||
+        transcript === "desactivar" ||
+        transcript === "desactivar voz"
+      ) {
+        recognition.stop();
+        setIsListening(false);
+      }
+    };
+  }, [recognition]);
 
   const toggleListening = () => {
     if (isListening) {
-      recognition.stop()
+      recognition.stop();
     } else {
-      recognition.start()
+      recognition.start();
     }
 
-    setIsListening(!isListening)
-  }
+    setIsListening(!isListening);
+  };
+
+  const filterOffers = (e) => {
+    const { value } = e.target;
+    const filtered = offers.filter((offer) =>
+      offer.Branch.name.toLowerCase().includes(value.toLowerCase())
+    );
+    dispatch(setFilteredOffers(filtered));
+  };
+
+  useEffect(() => {
+    setFilteredOffers(offers);
+  }, []);
 
   return (
     <nav className="h-[50px] bg-[#fd6c01] flex justify-center lg:px-0 px-10">
@@ -177,9 +192,9 @@ const Nav = ({ toggleShow }) => {
       <div className="lg:w-[1400px] w-full mx-auto flex flex-row items-center justify-between relative">
         {/* Left */}
         <div className="flex flex-row items-center lg:gap-3 gap-1">
-          <NavLink to={'/'}>
+          <NavLink to={"/"}>
             <img
-              src={'/public/mascota-clean.png'}
+              src={"/public/mascota-clean.png"}
               className="w-[45px]"
               alt="Logo Ferretería BOnilla"
             />
@@ -190,6 +205,7 @@ const Nav = ({ toggleShow }) => {
               type="text"
               className="bg-white lg:py-2 py-1 pl-5 outline-none text-sm flex-1"
               placeholder="Buscar ofertas"
+              onChange={filterOffers}
             />
             <div className="w-[50px] h-full flex justify-center items-center">
               <FaSearch color="#d1d1d1" size={18} />
@@ -202,7 +218,7 @@ const Nav = ({ toggleShow }) => {
           >
             <BiMicrophone
               size={20}
-              className={isListening ? 'animate-pulse' : ''}
+              className={isListening ? "animate-pulse" : ""}
             />
           </button>
         </div>
@@ -211,7 +227,7 @@ const Nav = ({ toggleShow }) => {
 
         <div className="lg:flex-row lg:items-center gap-2 hidden lg:flex relative">
           <NavLink
-            to={'/applications'}
+            to={"/applications"}
             className="w-[40px] h-[40px] rounded-full bg-[#cb4d03] border border-gray-300 cursor-pointer flex justify-center items-center text-white hover:bg-[#ff850b] transition-all duration-300"
             type="button"
           >
@@ -219,7 +235,7 @@ const Nav = ({ toggleShow }) => {
           </NavLink>
           <button
             className={`w-[40px] h-[40px] rounded-full ${
-              currentBox === 'msg' ? 'bg-[#ff850b]' : 'bg-[#cb4d03]'
+              currentBox === "msg" ? "bg-[#ff850b]" : "bg-[#cb4d03]"
             }  border border-gray-300 cursor-pointer flex justify-center items-center text-white hover:bg-[#ff850b] transition-all duration-300 relative`}
             type="button"
             onClick={toggleShowInbox}
@@ -234,7 +250,7 @@ const Nav = ({ toggleShow }) => {
           </button>
           <button
             className={`w-[40px] h-[40px] rounded-full ${
-              currentBox === 'noti' ? 'bg-[#ff850b]' : 'bg-[#cb4d03]'
+              currentBox === "noti" ? "bg-[#ff850b]" : "bg-[#cb4d03]"
             }  border border-gray-300 cursor-pointer flex justify-center items-center text-white hover:bg-[#ff850b] transition-all duration-300 relative`}
             type="button"
             onClick={toggleShowNotifications}
@@ -254,7 +270,7 @@ const Nav = ({ toggleShow }) => {
             onClick={toggleShowSettings}
           >
             <img
-              src={info.profilePicture ? info.profilePicture : '/user.png'}
+              src={info.profilePicture ? info.profilePicture : "/user.png"}
               alt="Foto de perfil"
               className="absolute w-full h-full object-cover rounded-full"
             />
@@ -288,7 +304,7 @@ const Nav = ({ toggleShow }) => {
         </button>
       </div>
     </nav>
-  )
-}
+  );
+};
 
-export default Nav
+export default Nav;

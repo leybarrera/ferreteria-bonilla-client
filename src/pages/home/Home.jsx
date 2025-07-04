@@ -1,10 +1,10 @@
-import { useEffect } from 'react'
-import { useState } from 'react'
-import { FaPlus } from 'react-icons/fa'
-import { IoArrowForwardOutline, IoQrCode } from 'react-icons/io5'
-import { useSelector } from 'react-redux'
-import { NavLink, useNavigate } from 'react-router-dom'
-import { toast, Toaster } from 'sonner'
+import { useEffect } from "react";
+import { useState } from "react";
+import { FaPlus } from "react-icons/fa";
+import { IoArrowForwardOutline, IoQrCode } from "react-icons/io5";
+import { useSelector } from "react-redux";
+import { NavLink, useNavigate } from "react-router-dom";
+import { toast, Toaster } from "sonner";
 import {
   branchApi,
   interestApi,
@@ -12,140 +12,141 @@ import {
   messageApi,
   notificationApi,
   postulationApi,
-} from '../../api/index.api'
+} from "../../api/index.api";
 import {
   setBranches,
   setMessages,
   setNotifications,
   setOffers,
-} from '../../redux/slices/app.slice'
+} from "../../redux/slices/app.slice";
 import {
   CoverLetterModal,
   QRComponent,
-} from '../../components/index.components.js'
-import { useDispatch } from 'react-redux'
-import { dateUtil, storageUtil } from '../../utils/index.utils.js'
-import { AxiosError } from 'axios'
+} from "../../components/index.components.js";
+import { useDispatch } from "react-redux";
+import { dateUtil, storageUtil } from "../../utils/index.utils.js";
+import { AxiosError } from "axios";
 
 const Home = () => {
-  const navigate = useNavigate()
-  const [showQR, setShowQR] = useState(false)
-  const [jobOffers, setJobOffers] = useState([])
-  const [jobOfferId, setJobOfferId] = useState(null)
-  const [messagesArr, setMessagesArr] = useState([])
-  const [coverLetter, setCoverLetter] = useState(null)
-  const [showCoverLetter, setShowCoverLetter] = useState(false)
+  const navigate = useNavigate();
+  const { filteredOffers: jobOffers } = useSelector((state) => state.app);
+  const [showQR, setShowQR] = useState(false);
+  // const [jobOffers, setJobOffers] = useState([]);
+  const [jobOfferId, setJobOfferId] = useState(null);
+  const [messagesArr, setMessagesArr] = useState([]);
+  const [coverLetter, setCoverLetter] = useState(null);
+  const [showCoverLetter, setShowCoverLetter] = useState(false);
 
   const toggleShowCoverLetter = () => {
-    setShowCoverLetter((prev) => !prev)
-  }
+    setShowCoverLetter((prev) => !prev);
+  };
 
-  const [postulations, setPostulations] = useState([])
-  const [interests, setInterests] = useState([])
-  const dispatch = useDispatch()
-  const { info } = useSelector((state) => state.user)
-  const { branches } = useSelector((state) => state.app)
+  const [postulations, setPostulations] = useState([]);
+  const [interests, setInterests] = useState([]);
+  const dispatch = useDispatch();
+  const { info } = useSelector((state) => state.user);
+  const { branches } = useSelector((state) => state.app);
 
   const toggleShowQR = () => {
-    setShowQR((prev) => !prev)
-  }
+    setShowQR((prev) => !prev);
+  };
 
   const getPostulations = () => {
     postulationApi.getByUserId(info.id).then((res) => {
-      const { jobApplications } = res.data
-      setPostulations(jobApplications)
-      dispatch(setPostulations(jobApplications))
-    })
-  }
+      const { jobApplications } = res.data;
+      setPostulations(jobApplications);
+      dispatch(setPostulations(jobApplications));
+    });
+  };
 
   const getInterests = async () => {
-    const { token } = storageUtil.getData('session')
+    const { token } = storageUtil.getData("session");
     interestApi
       .getByUserId(token, info.id)
       .then((res) => {
-        const { interests } = res.data
-        setInterests(interests)
+        const { interests } = res.data;
+        setInterests(interests);
       })
       .catch((err) => {
         if (err instanceof AxiosError) {
-          toast.error(err.response.data.message)
+          toast.error(err.response.data.message);
         } else {
-          toast.error('Error desconocido. Intente más tarde.')
+          toast.error("Error desconocido. Intente más tarde.");
         }
-      })
-  }
+      });
+  };
 
   const followBranch = (id) => {
-    const { token } = storageUtil.getData('session')
+    const { token } = storageUtil.getData("session");
     interestApi
       .follow(token, info.id, id)
       .then((res) => {
-        const { message } = res.data
-        toast.success(message)
-        getInterests()
+        const { message } = res.data;
+        toast.success(message);
+        getInterests();
       })
       .catch((err) => {
         if (err instanceof AxiosError) {
-          toast.error(err.response.data.message)
+          toast.error(err.response.data.message);
         } else {
-          toast.error('Error desconocido. Intente más tarde.')
+          toast.error("Error desconocido. Intente más tarde.");
         }
-      })
-  }
+      });
+  };
 
   const groupMessagesByUser = (messages, currentUserId) => {
-    const grouped = {}
+    const grouped = {};
 
     messages.forEach((msg) => {
-      const isIncoming = msg.ReceiverId === currentUserId
+      const isIncoming = msg.ReceiverId === currentUserId;
       const otherUser =
-        msg.SenderId === currentUserId ? msg.Receiver : msg.Sender
+        msg.SenderId === currentUserId ? msg.Receiver : msg.Sender;
 
       if (!grouped[otherUser.id]) {
         grouped[otherUser.id] = {
           user: otherUser,
           lastMessage: msg,
           unreadCount: 0,
-        }
+        };
       }
 
       // Contar si es un mensaje entrante no leído
       if (isIncoming && !msg.isRead) {
-        grouped[otherUser.id].unreadCount += 1
+        grouped[otherUser.id].unreadCount += 1;
       }
 
       // Actualizar último mensaje si es más reciente
-      const existingTime = new Date(grouped[otherUser.id].lastMessage.senderAt)
-      const newTime = new Date(msg.senderAt)
+      const existingTime = new Date(grouped[otherUser.id].lastMessage.senderAt);
+      const newTime = new Date(msg.senderAt);
       if (newTime > existingTime) {
-        grouped[otherUser.id].lastMessage = msg
+        grouped[otherUser.id].lastMessage = msg;
       }
-    })
+    });
 
-    return Object.values(grouped)
-  }
+    return Object.values(grouped);
+  };
 
   const unFollowBranch = (id) => {
     const interest = interests.find(
       (interest) => interest.BranchId === id && interest.UserId === info.id
-    )
+    );
 
-    const { token } = storageUtil.getData('session')
+    const { token } = storageUtil.getData("session");
     interestApi
       .unFollow(token, interest.id)
       .then((res) => {
-        const { message } = res.data
-        toast.success(message)
-        getInterests()
+        const { message } = res.data;
+        toast.success(message);
+        getInterests();
       })
       .catch((err) => {
         if (err instanceof AxiosError) {
-          toast.error(err.response.data.message)
+          toast.error(err.response.data.message);
         } else {
-          toast.error('Error desconocido. Intente más tarde.')
+          toast.error("Error desconocido. Intente más tarde.");
         }
-      })
-  }
+      });
+  };
 
   // useEffect(() => {
   //   toast.warning(
@@ -154,8 +155,8 @@ const Home = () => {
   // }, [profileCompleted])
 
   const handleConfirmApplyJob = () => {
-    const { token } = storageUtil.getData('session')
-    toggleShowCoverLetter()
+    const { token } = storageUtil.getData("session");
+    toggleShowCoverLetter();
     postulationApi
       .applyJob(token, {
         UserId: info.id,
@@ -163,89 +164,89 @@ const Home = () => {
         coverLetter,
       })
       .then((res) => {
-        const { message } = res.data
-        toast.success(message)
-        getPostulations()
+        const { message } = res.data;
+        toast.success(message);
+        getPostulations();
       })
       .catch((err) => {
         if (err instanceof AxiosError) {
-          toast.error(err.response.data.message)
+          toast.error(err.response.data.message);
         } else {
-          toast.error('Error desconocido. Intente más tarde.')
+          toast.error("Error desconocido. Intente más tarde.");
         }
-      })
-  }
+      });
+  };
 
   const applyJob = (JobOfferId) => {
-    toggleShowCoverLetter()
-    setJobOfferId(JobOfferId)
-  }
+    toggleShowCoverLetter();
+    setJobOfferId(JobOfferId);
+  };
 
   const cancelApplyJob = (id) => {
-    const { token } = storageUtil.getData('session')
+    const { token } = storageUtil.getData("session");
     postulationApi
       .cancelApplyJob(token, id)
       .then((res) => {
-        const { message } = res.data
-        toast.success(message)
-        getPostulations()
+        const { message } = res.data;
+        toast.success(message);
+        getPostulations();
       })
       .catch((err) => {
         if (err instanceof AxiosError) {
-          toast.error(err.response.data.message)
+          toast.error(err.response.data.message);
         } else {
-          toast.error('Error desconocido. Intente más tarde.')
+          toast.error("Error desconocido. Intente más tarde.");
         }
-      })
-  }
+      });
+  };
 
   useEffect(() => {
-    const session = storageUtil.getData('session')
+    const session = storageUtil.getData("session");
     if (!session) {
-      navigate('/inicio-sesion')
-      return
+      navigate("/inicio-sesion");
+      return;
     }
 
-    const { token } = session
+    const { token } = session;
 
     // Get sucursales
     branchApi
       .getAll()
       .then((res) => {
-        const { branches } = res.data
-        dispatch(setBranches(branches))
+        const { branches } = res.data;
+        dispatch(setBranches(branches));
       })
       .catch((err) => {
-        console.log(err)
-      })
+        console.log(err);
+      });
 
     // Get Ofertas
     jobOffersApi.getAll(token).then((res) => {
-      const { jobOffers } = res.data
-      setJobOffers(jobOffers)
-      dispatch(setOffers(jobOffers))
-    })
+      const { jobOffers } = res.data;
+      // setJobOffers(jobOffers);
+      dispatch(setOffers(jobOffers));
+    });
     // Get Mensajes
     messageApi.getMyMessages(info.id).then((res) => {
-      const { conversations } = res.data
-      const grouped = groupMessagesByUser(conversations, info.id)
-      setMessagesArr(grouped)
-      dispatch(setMessages(grouped))
-    })
+      const { conversations } = res.data;
+      const grouped = groupMessagesByUser(conversations, info.id);
+      setMessagesArr(grouped);
+      dispatch(setMessages(grouped));
+    });
     // Get notificaciones
     notificationApi.getAllByUserId(info.id).then((res) => {
-      const { notifications } = res.data
-      dispatch(setNotifications(notifications))
-    })
+      const { notifications } = res.data;
+      dispatch(setNotifications(notifications));
+    });
     // Get Postulaciones
-    getPostulations()
+    getPostulations();
 
     // Get Intereses
     interestApi.getByUserId(token, info.id).then((res) => {
-      const { interests } = res.data
-      setInterests(interests)
-    })
-  }, [])
+      const { interests } = res.data;
+      setInterests(interests);
+    });
+  }, []);
 
   return (
     <main className="lg:w-[1400px] mx-auto w-full flex lg:flex-row flex-col py-10 lg:px-0 px-10 gap-5 h-full bg-[#F4F2EE]">
@@ -260,7 +261,7 @@ const Home = () => {
           />
           {/* Imagen de perfil */}
           <img
-            src={info?.profilePicture || '/user.png'}
+            src={info?.profilePicture || "/user.png"}
             alt="Imagen de perfil del usuario"
             className="absolute lg:w-[72px] lg:h-[72px] md:w-[100px] md:h-[100px] h-[80px] w-[80px]  border-2 border-gray-400 rounded-full left-5 lg:-bottom-1/2 md:-bottom-10 -bottom-1/2"
           />
@@ -307,12 +308,12 @@ const Home = () => {
           jobOffers.map((offer) => {
             const isPostulated = postulations.some(
               (postulation) => postulation.JobOfferId === offer.id
-            )
+            );
             const postulationFound = postulations.find(
               (postulation) =>
                 postulation.JobOfferId === offer.id &&
                 postulation.UserId === info.id
-            )
+            );
 
             return (
               <article
@@ -360,12 +361,12 @@ const Home = () => {
                       disabled={!info?.isDataValidated}
                     >
                       {info?.isDataValidated
-                        ? 'Aplicar'
-                        : 'Completa tu perfil para aplicar'}
+                        ? "Aplicar"
+                        : "Completa tu perfil para aplicar"}
                     </button>
                   )}
 
-                  {postulationFound?.status === 'Pendiente' && (
+                  {postulationFound?.status === "Pendiente" && (
                     <button
                       className="w-full py-2 flex flex-row items-center justify-center gap-2 mt-3 bg-gray-800 text-white text-lg font-bold rounded-xl cursor-pointer hover:bg-gray-700 transition-colors duration-300"
                       onClick={() => cancelApplyJob(postulationFound.id)}
@@ -374,20 +375,20 @@ const Home = () => {
                     </button>
                   )}
 
-                  {postulationFound?.status === 'Aceptada' && (
+                  {postulationFound?.status === "Aceptada" && (
                     <h3 className="text-sm font-semibold text-green-600 mt-2">
                       Ya has sido aceptado para esta oferta.
                     </h3>
                   )}
 
-                  {postulationFound?.status === 'Rechazada' && (
+                  {postulationFound?.status === "Rechazada" && (
                     <h3 className="text-sm font-semibold text-red-600 mt-2">
                       Tu postulación fue rechazada. Gracias por tu interés.
                     </h3>
                   )}
                 </main>
               </article>
-            )
+            );
           })
         ) : (
           <div className="w-full lg:h-[200px] h-[500px] flex flex-col justify-center items-center bg-[#fff9ec] border border-[#fff9ec] rounded-lg">
@@ -410,7 +411,7 @@ const Home = () => {
             branches.map((branch) => {
               const isFollowing = interests.some(
                 (inter) => inter.BranchId === branch.id
-              )
+              );
               return (
                 <article className="flex flex-row gap-3" key={branch.id}>
                   {/* Foto de la sucursal */}
@@ -454,7 +455,7 @@ const Home = () => {
                     )}
                   </div>
                 </article>
-              )
+              );
             })
           ) : (
             <div className="w-full px-5 py-10 flex justify-center items-center">
@@ -465,7 +466,7 @@ const Home = () => {
           )}
           {branches && branches.length > 0 && (
             <NavLink
-              to={'/branches'}
+              to={"/branches"}
               className="flex flex-row items-center gap-2 "
             >
               <span className="text-[16px] text-[#000000BF] hover:text-gray-900 transition-all duration-300">
@@ -493,7 +494,7 @@ const Home = () => {
 
       {showQR && <QRComponent toggleShowQR={toggleShowQR} />}
     </main>
-  )
-}
+  );
+};
 
-export default Home
+export default Home;

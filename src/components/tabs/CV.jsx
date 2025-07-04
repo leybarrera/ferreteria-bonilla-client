@@ -1,99 +1,104 @@
-import { useEffect, useState, useRef } from 'react'
-import { RiUploadCloudFill } from 'react-icons/ri'
-import { toast, Toaster } from 'sonner'
-import { useSelector } from 'react-redux'
-import { resumeApi } from '../../api/index.api'
+import { useEffect, useState, useRef } from "react";
+import { RiUploadCloudFill } from "react-icons/ri";
+import { toast, Toaster } from "sonner";
+import { useSelector } from "react-redux";
+import { resumeApi } from "../../api/index.api";
+import { AxiosError } from "axios";
 
 const CV = () => {
-  const { info } = useSelector((state) => state.user)
-  const [resume, setResume] = useState(null)
-  const [_, setResumeUri] = useState(null)
-  const [resumeLink, setResumeLink] = useState(null)
+  const { info } = useSelector((state) => state.user);
+  const [resume, setResume] = useState(null);
+  const [_, setResumeUri] = useState(null);
+  const [resumeLink, setResumeLink] = useState(null);
 
-  // Ref para la entrada de archivo
-  const fileInputRef = useRef(null)
+  const fileInputRef = useRef(null);
 
   const handleResumeChange = (e) => {
-    const file = e.target.files[0]
+    const file = e.target.files[0];
     if (file) {
-      const uri = URL.createObjectURL(file)
-      setResumeUri(uri)
-      setResume(file)
+      const uri = URL.createObjectURL(file);
+      setResumeUri(uri);
+      setResume(file);
     }
-  }
+  };
 
   const handleCancel = () => {
-    setResume(null)
-    setResumeUri(null)
-
-    // Reseteamos el valor del input file
+    setResume(null);
+    setResumeUri(null);
     if (fileInputRef.current) {
-      fileInputRef.current.value = null
+      fileInputRef.current.value = null;
     }
-  }
+  };
 
   const saveResume = () => {
     if (!resume) {
-      alert('Por favor, selecciona un currículum para subir.')
-      return
+      toast.error("No has cargado un currículum.");
+      return;
     }
 
-    const formData = new FormData()
-    formData.append('resume', resume)
+    const formData = new FormData();
+    formData.append("resume", resume);
 
     resumeApi
-      .saveResume(info.id, formData) // Esta función en tu API se encargará de subir el archivo
+      .saveResume(info.id, formData)
       .then((res) => {
-        const { message, secure_url } = res.data
-        setResumeLink(secure_url)
-        toast.success(message)
-        // const { resume } = res.data
-        // alert('Currículum subido exitosamente.')
+        const { message, secure_url } = res.data;
+        setResumeLink(secure_url);
+        setResume(null);
+        setResumeUri(null);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = null;
+        }
+        toast.success(message);
       })
       .catch((err) => {
-        console.error(err)
-        // alert('Hubo un error al subir el currículum.')
-      })
-  }
+        if (err instanceof AxiosError) {
+          toast.error(err.response.data.message);
+        } else {
+          toast.error("Error desconocido. Intente más tarde.");
+        }
+      });
+  };
 
   const handleDelete = () => {
     if (!resumeLink) {
-      alert('No tienes un currículum para eliminar.')
-      return
+      toast.error("No tienes un currículum para eliminar.");
+      return;
     }
 
     resumeApi
-      .deleteResume(info.id) // Función en tu API que elimina el currículum
+      .deleteResume(info.id)
       .then((res) => {
-        const { message } = res.data
-        setResumeLink(null) // Elimina el enlace del currículum
-        toast.success(message)
-        handleCancel()
+        const { message } = res.data;
+        setResumeLink(null);
+        toast.success(message);
+        handleCancel();
       })
       .catch((err) => {
-        console.log(err.message)
-        console.error(err)
-        alert('Hubo un error al eliminar el currículum.')
-      })
-  }
+        if (err instanceof AxiosError) {
+          toast.error(err.response.data.message);
+        } else {
+          toast.error("Error desconocido. Intente más tarde.");
+        }
+      });
+  };
 
   useEffect(() => {
     if (info) {
-      const { id } = info
-      console.log(id)
+      const { id } = info;
       resumeApi
         .getByUserId(id)
         .then((res) => {
-          const { resume } = res.data
+          const { resume } = res.data;
           if (resume) {
-            setResumeLink(resume.url) // Aquí ya tienes el enlace al currículum si existe
+            setResumeLink(resume.url);
           }
         })
         .catch((err) => {
-          console.log(err)
-        })
+          console.log(err);
+        });
     }
-  }, [info])
+  }, [info]);
 
   return (
     <div className="flex flex-col">
@@ -118,7 +123,7 @@ const CV = () => {
                   Ver Currículum
                 </a>
                 <button
-                  onClick={() => handleDelete()}
+                  onClick={handleDelete}
                   className="px-6 py-3 bg-red-500 text-white font-semibold rounded-lg hover:bg-red-600 transition duration-200"
                 >
                   Eliminar Currículum
@@ -132,8 +137,8 @@ const CV = () => {
                   Selecciona tu Currículum
                 </h3>
                 <p className="text-sm text-gray-500">
-                  Suba un archivo en formato PDF, DOC o DOCX. Tamaño máximo:
-                  2MB.
+                  Suba un archivo en formato PDF, cualquier otro formato no es
+                  válido. Tamaño máximo: 2MB.
                 </p>
               </div>
 
@@ -196,7 +201,7 @@ const CV = () => {
 
       <Toaster richColors />
     </div>
-  )
-}
+  );
+};
 
-export default CV
+export default CV;

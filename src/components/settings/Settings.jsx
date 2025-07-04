@@ -1,26 +1,26 @@
-import { FaBook } from 'react-icons/fa'
-import { GoDotFill } from 'react-icons/go'
-import { LuChevronRight } from 'react-icons/lu'
-import { RiLogoutCircleFill, RiSettings3Fill } from 'react-icons/ri'
-import { useSelector } from 'react-redux'
-import { NavLink, useNavigate } from 'react-router-dom'
+import { FaBook } from "react-icons/fa";
+import { GoDotFill } from "react-icons/go";
+import { LuChevronRight } from "react-icons/lu";
+import { RiLogoutCircleFill, RiSettings3Fill } from "react-icons/ri";
+import { useSelector } from "react-redux";
+import { NavLink, useNavigate } from "react-router-dom";
 
 const Settings = ({ showSettings, toggleShowSettings, logout }) => {
-  const { info } = useSelector((state) => state.user)
-  const navigate = useNavigate()
+  const { info } = useSelector((state) => state.user);
+  const navigate = useNavigate();
 
   const handleLogout = () => {
-    logout()
-  }
+    logout();
+  };
 
   const goToProfile = () => {
-    toggleShowSettings()
-    navigate(`/perfil/${info.id}`)
-  }
+    toggleShowSettings();
+    navigate(`/perfil/${info.id}`);
+  };
   return (
     <div
       className={`absolute top-full right-0 h-auto bg-gray-100 border border-gray-200 w-[400px]  z-50 rounded-xl mt-1 flex flex-col ${
-        showSettings ? 'block' : 'hidden'
+        showSettings ? "block" : "hidden"
       } transition-all duration-300 pb-5`}
     >
       {/* Header */}
@@ -31,14 +31,12 @@ const Settings = ({ showSettings, toggleShowSettings, logout }) => {
           onClick={goToProfile}
         >
           <img
-            src={info.profilePicture ? info.profilePicture : '/user.png'}
+            src={info.profilePicture ? info.profilePicture : "/user.png"}
             alt="Profile Image"
             className="w-[50px] h-[50px] rounded-full"
           />
           <div className="flex flex-col items-start">
-            <h2 className="font-bold text-gray-900 text-lg">
-              Cristhian Rodríguez
-            </h2>
+            <h2 className="font-bold text-gray-900 text-lg">{info.fullName}</h2>
             <h3>{info.email}</h3>
           </div>
         </button>
@@ -48,7 +46,7 @@ const Settings = ({ showSettings, toggleShowSettings, logout }) => {
       <section className="px-3 flex flex-col mt-2">
         <NavLink
           className="py-5 px-2 gap-2 flex flex-row items-center justify-between hover:bg-gray-200 rounded-lg transition-all duration-300"
-          to={'/settings'}
+          to={"/settings"}
           onClick={toggleShowSettings}
         >
           <RiSettings3Fill size={20} />
@@ -70,7 +68,7 @@ const Settings = ({ showSettings, toggleShowSettings, logout }) => {
         </button>
       </section>
     </div>
-  )
-}
+  );
+};
 
-export default Settings
+export default Settings;

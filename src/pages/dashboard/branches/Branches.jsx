@@ -1,88 +1,77 @@
-import { FaEdit, FaTrash } from 'react-icons/fa'
-import { IoSearch } from 'react-icons/io5'
-import { RiCloseLine } from 'react-icons/ri'
-import BranchModal from '../../../components/modal/BranchModal'
-import { useState } from 'react'
-import { useEffect } from 'react'
-import { storageUtil } from '../../../utils/index.utils'
-import { branchApi } from '../../../api/index.api'
-import Swal from 'sweetalert2'
-import { toast, Toaster } from 'sonner'
-import { AxiosError } from 'axios'
+import { FaEdit, FaTrash } from "react-icons/fa";
+import { IoSearch } from "react-icons/io5";
+import { RiCloseLine } from "react-icons/ri";
+import BranchModal from "../../../components/modal/BranchModal";
+import { useState } from "react";
+import { useEffect } from "react";
+import { storageUtil } from "../../../utils/index.utils";
+import { branchApi } from "../../../api/index.api";
+import Swal from "sweetalert2";
+import { toast, Toaster } from "sonner";
+import { AxiosError } from "axios";
 
 const Branches = () => {
-  const [branchId, setBranchId] = useState(null)
-  const [branches, setBranches] = useState([])
-  const [showModal, setShowModal] = useState(false)
+  const [branchId, setBranchId] = useState(null);
+  const [branches, setBranches] = useState([]);
+  const [showModal, setShowModal] = useState(false);
   const toggleModal = () => {
-    setShowModal((prev) => !prev)
-  }
+    setShowModal((prev) => !prev);
+  };
 
   const deleteBranch = (id) => {
     Swal.fire({
-      title: '¿Estás seguro?',
-      text: '¡No podrás revertir esto!',
-      icon: 'warning',
+      title: "¿Estás seguro?",
+      text: "¡No podrás revertir esto!",
+      icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Si, eliminar',
-      cancelButtonText: 'Cancelar',
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Si, eliminar",
+      cancelButtonText: "Cancelar",
     }).then((res) => {
       if (res.isConfirmed) {
-        const { token } = storageUtil.getData('session')
+        const { token } = storageUtil.getData("session");
 
         branchApi
           .delete(token, id)
           .then((res) => {
-            const { message } = res.data
-            toast.success(message)
-            setBranches((prev) => prev.filter((branch) => branch.id !== id))
+            const { message } = res.data;
+            toast.success(message);
+            setBranches((prev) => prev.filter((branch) => branch.id !== id));
           })
           .catch((err) => {
             if (err instanceof AxiosError) {
-              toast.error(err.response.data.message)
+              toast.error(err.response.data.message);
             } else {
-              toast.error('Error desconocido. Intente más tarde.')
+              toast.error("Error desconocido. Intente más tarde.");
             }
-          })
+          });
       }
-    })
-  }
+    });
+  };
 
   const editBranch = (id) => {
-    setBranchId(id)
-    toggleModal()
-  }
-
-  useEffect(() => {
-    const session = storageUtil.getData('session')
-    const { token } = session
+    setBranchId(id);
+    toggleModal();
+  };
+  const getBranches = () => {
+    const session = storageUtil.getData("session");
+    const { token } = session;
 
     branchApi.getAll(token).then((res) => {
-      const { branches } = res.data
-      setBranches(branches)
-    })
-  }, [])
+      const { branches } = res.data;
+      setBranches(branches);
+    });
+  };
+
+  useEffect(() => {
+    getBranches();
+  }, []);
   return (
     <main className="w-full h-full flex lg:px-10 lg:py-10 py-20 md:px-5 px-2 flex-col">
       <h2 className="text-3xl font-bold">Sucursales</h2>
       {/* Seccion busqueda y agregar */}
-      <section className="w-full flex flex-row items-center justify-between mt-5">
-        {/* Busqueda */}
-        <div className="bg-white h-[50px] w-[400px] border border-gray-200 rounded-lg flex flex-row">
-          <input
-            type="text"
-            name="search"
-            id="search"
-            placeholder="Buscar sucursal"
-            className="flex-1 h-full outline-none px-5 text-gray-400"
-          />
-          <div className="w-[70px] h-full flex justify-center items-center">
-            <IoSearch size={25} color="#d1d5dc" />
-          </div>
-        </div>
-
+      <section className="w-full flex flex-row items-center justify-end mt-5">
         <button
           className="bg-[#fd6c01] text-white px-5 py-2 rounded-lg font-bold cursor-pointer hover:bg-[#cb4d03] transition-all duration-300"
           type="button"
@@ -129,7 +118,7 @@ const Branches = () => {
                   <td className="px-6 py-4">{branch.phone}</td>
                   <td className="px-6 py-4">{branch.email}</td>
                   <td className="px-6 py-4">{`${branch.province}, ${branch.city}`}</td>
-                  <td className="px-6 py-4">{branch.isMain ? 'Si' : 'No'}</td>
+                  <td className="px-6 py-4">{branch.isMain ? "Si" : "No"}</td>
                   <td className="px-6 py-4 text-right flex flex-row gap-5 items-center">
                     <button
                       className="cursor-pointer hover:text-white transition-all duration-300"
@@ -162,9 +151,10 @@ const Branches = () => {
         showModal={showModal}
         toggleModal={toggleModal}
         branchId={branchId}
+        getBranches={getBranches}
       />
     </main>
-  )
-}
+  );
+};
 
-export default Branches
+export default Branches;

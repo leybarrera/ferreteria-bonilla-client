@@ -1,23 +1,22 @@
-import { IoBusinessSharp } from 'react-icons/io5'
-import { AiFillEdit } from 'react-icons/ai'
-import { useNavigate } from 'react-router-dom'
-import { useEffect } from 'react'
+import { IoBusinessSharp } from "react-icons/io5";
+import { AiFillEdit } from "react-icons/ai";
+import { useNavigate } from "react-router-dom";
 
 const WorkExperience = ({ userExperiences, isOwner }) => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const goToSettings = () => {
-    navigate('/settings', {
+    navigate("/settings", {
       state: {
-        tab: 'experiencia',
+        tab: "experiencia",
       },
-    })
-  }
+    });
+  };
 
   const ownerMessage =
-    '¡Agrega tu experiencia laboral para que otros vean tu trayectoria profesional y habilidades!'
+    "¡Agrega tu experiencia laboral para que otros vean tu trayectoria profesional y habilidades!";
   const defaultMessage =
-    'Este usuario aún no ha completado su sección de experiencia laboral. ¡Vuelve más tarde para conocer más sobre su trayectoria profesional!'
+    "Este usuario aún no ha completado su sección de experiencia laboral. ¡Vuelve más tarde para conocer más sobre su trayectoria profesional!";
 
   return (
     <div className="flex flex-col p-5 border border-gray-200 bg-white rounded-lg">
@@ -54,8 +53,18 @@ const WorkExperience = ({ userExperiences, isOwner }) => {
                   {experience.companyName}
                 </h5>
                 <h5 className="text-sm font-light text-black">
-                  {experience.startDate} - {experience.endDate} /{' '}
-                  {experience.endDate - experience.startDate} años
+                  {experience.startDate} /{" "}
+                  {experience.isCurrentJob ? "Actual" : experience.endDate}
+                  {" • "}
+                  {(() => {
+                    const start = parseInt(experience.startDate);
+                    const end = experience.isCurrentJob
+                      ? new Date().getFullYear()
+                      : parseInt(experience.endDate);
+
+                    const duration = end - start;
+                    return `${duration} año${duration === 1 ? "" : "s"}`;
+                  })()}
                 </h5>
                 {/* <h5 className="text-sm font-light text-black">
                   {experience.location} - {experience.workMode}
@@ -74,7 +83,7 @@ const WorkExperience = ({ userExperiences, isOwner }) => {
         </p>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default WorkExperience
+export default WorkExperience;

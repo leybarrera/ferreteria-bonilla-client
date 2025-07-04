@@ -1,82 +1,92 @@
-import { useEffect } from 'react'
-import { useState } from 'react'
-import { RiCloseFill, RiRefreshFill, RiRefreshLine } from 'react-icons/ri'
-import { useSelector } from 'react-redux'
-import { messageApi } from '../../api/index.api'
-import { storageUtil } from '../../utils/index.utils'
-import { useRef } from 'react'
+import { useEffect } from "react";
+import { useState } from "react";
+import { RiCloseFill, RiRefreshFill, RiRefreshLine } from "react-icons/ri";
+import { useSelector } from "react-redux";
+import { messageApi, userApi } from "../../api/index.api";
+import { storageUtil } from "../../utils/index.utils";
+import { useRef } from "react";
 
 const ConversationModal = ({
   showConversation,
   toggleConversation,
   ReceiverId,
 }) => {
-  const { info } = useSelector((state) => state.admin)
-  const [conversation, setConversation] = useState([])
-  const messagesEndRef = useRef(null)
+  const [currentUser, setCurrentUser] = useState(null);
+  const { info } = useSelector((state) => state.user);
+  const [conversation, setConversation] = useState([]);
+  const messagesEndRef = useRef(null);
 
-  const [text, setText] = useState('')
+  const [text, setText] = useState("");
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
   const handleChange = (e) => {
-    const { value } = e.target
-    setText(value)
-  }
+    const { value } = e.target;
+    setText(value);
+  };
 
   const getConversation = () => {
-    const { token } = storageUtil.getData('session')
+    const { token } = storageUtil.getData("session");
     messageApi
       .getConversation(token, info.id, ReceiverId)
       .then((res) => {
-        const { conversations } = res.data
-        setConversation(conversations)
+        const { conversations } = res.data;
+        setConversation(conversations);
       })
       .catch((err) => {
-        console.log(err)
-      })
-  }
+        console.log(err);
+      });
+  };
 
-  const reloadMessages = () => getConversation()
+  const reloadMessages = () => getConversation();
 
   const handleKeyDown = (e) => {
-    const { token } = storageUtil.getData('session')
-    if (e.key === 'Enter' && text.length > 0) {
-      e.preventDefault()
+    const { token } = storageUtil.getData("session");
+    if (e.key === "Enter" && text.length > 0) {
+      e.preventDefault();
       const newMessage = {
         SenderId: info.id,
         ReceiverId: ReceiverId,
         text: text,
-      }
-      setConversation((prev) => [...prev, newMessage])
+      };
+      setConversation((prev) => [...prev, newMessage]);
       messageApi
         .sendMessage(token, newMessage)
         .then((res) => {
-          console.log(res.data)
+          console.log(res.data);
         })
         .catch((err) => {
-          console.log(err)
-        })
-      setText('')
+          console.log(err);
+        });
+      setText("");
       // toggleConversation()
     }
-  }
+  };
 
   useEffect(() => {
-    scrollToBottom()
-  }, [conversation])
+    scrollToBottom();
+  }, [conversation]);
 
   useEffect(() => {
     // OBTENER MENSAJES
-    getConversation()
-  }, [showConversation, ReceiverId])
+    userApi
+      .getById(ReceiverId)
+      .then((res) => {
+        const { user } = res.data;
+        setCurrentUser(user);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+    getConversation();
+  }, [showConversation, ReceiverId]);
 
   return (
     <div
       className={`${
-        showConversation ? 'flex' : 'hidden'
+        showConversation ? "flex" : "hidden"
       } absolute w-full bg-black/50 top-0 left-0 z-50 justify-center items-center h-screen`}
     >
       <section
@@ -87,11 +97,10 @@ const ConversationModal = ({
         <header className="w-full border-b border-gray-200 px-5 py-3 flex flex-row items-center justify-between bg-gray-800">
           <div className="flex flex-row gap-3">
             <img src="/user.png" alt="" className="w-[40px] rounded-full" />
-            <div className="flex flex-col">
+            <div className="flex flex-col justify-center">
               <h3 className="text-sm font-semibold text-white">
-                Cristhian Rodríguez
+                {currentUser?.fullName}
               </h3>
-              <h5 className="text-xs text-gray-400">Director de Desarrollo</h5>
             </div>
           </div>
           <div className="flex flex-row items-center gap-2">
@@ -131,7 +140,7 @@ const ConversationModal = ({
                   <span className="text-sm">{msg.text}</span>
                 </div>
               </div>
-            )
+            );
           })}
           <div ref={messagesEndRef} />
         </main>
@@ -151,7 +160,7 @@ const ConversationModal = ({
         </footer>
       </section>
     </div>
-  )
-}
+  );
+};
 
-export default ConversationModal
+export default ConversationModal;

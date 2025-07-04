@@ -1,33 +1,47 @@
-import { useEffect, useState } from 'react'
-import { useSelector } from 'react-redux'
-import { toast, Toaster } from 'sonner'
-import { referencesApi } from '../../api/index.api'
-import { AxiosError } from 'axios'
-import { MdDelete } from 'react-icons/md'
+import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { toast, Toaster } from "sonner";
+import { referencesApi } from "../../api/index.api";
+import { AxiosError } from "axios";
+import { MdDelete } from "react-icons/md";
+import { validatorUtils } from "../../utils/index.utils";
 
 const ReferencesTab = () => {
-  const { info } = useSelector((state) => state.user)
+  const { info } = useSelector((state) => state.user);
   const initialData = {
-    name: '',
-    email: '',
-    phone: '',
-    relationship: '',
-  }
+    name: "",
+    email: "",
+    phone: "",
+    relationship: "",
+  };
 
-  const [reference, setReference] = useState(initialData)
-  const [references, setReferences] = useState([])
+  const [reference, setReference] = useState(initialData);
+  const [references, setReferences] = useState([]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target
+    const { name, value } = e.target;
     setReference((prev) => ({
       ...prev,
       [name]: value,
-    }))
-  }
+    }));
+  };
   const handleSave = () => {
-    if (Object.values(reference).some((educ) => educ === '')) {
-      toast.error('Todos los datos son obligatorios')
-      return
+    if (Object.values(reference).some((educ) => educ === "")) {
+      toast.error("Todos los datos son obligatorios");
+      return;
+    }
+
+    if (!validatorUtils.isValidEmail(reference.email)) {
+      toast.error("Correo no válido");
+      return;
+    }
+
+    if (
+      reference.phone &&
+      !validatorUtils.isValidPhone(reference.phone.toString())
+    ) {
+      toast.error("Teléfono no válido");
+      return;
     }
 
     referencesApi
@@ -36,47 +50,47 @@ const ReferencesTab = () => {
         UserId: info.id,
       })
       .then((res) => {
-        const { message } = res.data
-        toast.success(message)
-        getAllData()
-        setReference(initialData)
+        const { message } = res.data;
+        toast.success(message);
+        getAllData();
+        setReference(initialData);
       })
       .catch((err) => {
         if (err instanceof AxiosError) {
-          toast.error(err.response.data.message)
+          toast.error(err.response.data.message);
         } else {
-          toast.error('Error desconocido. Intente más tarde.')
+          toast.error("Error desconocido. Intente más tarde.");
         }
-      })
-  }
+      });
+  };
 
   const getAllData = () => {
     referencesApi.getByUserId(info.id).then((res) => {
-      const { userReferences } = res.data
-      setReferences(userReferences)
-    })
-  }
+      const { userReferences } = res.data;
+      setReferences(userReferences);
+    });
+  };
 
   const deleteReference = (id) => {
     referencesApi
       .delete(id)
       .then((res) => {
-        const { message } = res.data
-        toast.success(message)
-        getAllData()
+        const { message } = res.data;
+        toast.success(message);
+        getAllData();
       })
       .catch((err) => {
         if (err instanceof AxiosError) {
-          toast.error(err.response.data.message)
+          toast.error(err.response.data.message);
         } else {
-          toast.error('Error desconocido. Intente más tarde.')
+          toast.error("Error desconocido. Intente más tarde.");
         }
-      })
-  }
+      });
+  };
 
   useEffect(() => {
-    getAllData()
-  }, [])
+    getAllData();
+  }, []);
   return (
     <main className="flex flex-col">
       <div className="w-full max-w-[1000px] flex flex-col">
@@ -89,8 +103,21 @@ const ReferencesTab = () => {
               <input
                 type="text"
                 name="name"
-                onChange={handleChange}
+                minLength={5}
                 value={reference.name}
+                onChange={handleChange}
+                onBlur={(e) => {
+                  const textoLimpio = e.target.value.replace(
+                    /[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g,
+                    ""
+                  );
+                  handleChange({
+                    target: {
+                      name: e.target.name,
+                      value: textoLimpio,
+                    },
+                  });
+                }}
                 className="h-[60px] px-2 bg-gray-200 border border-gray-200 rounded-lg outline-none"
               />
             </div>
@@ -99,9 +126,10 @@ const ReferencesTab = () => {
                 Email
               </label>
               <input
-                type="text"
+                type="email"
                 name="email"
                 onChange={handleChange}
+                placeholder="example@gmail.com"
                 value={reference.email}
                 className="h-[60px] px-2 bg-gray-200 border border-gray-200 rounded-lg outline-none"
               />
@@ -113,9 +141,18 @@ const ReferencesTab = () => {
                 Teléfono
               </label>
               <input
-                type="text"
+                type="tel"
                 name="phone"
-                onChange={handleChange}
+                pattern="[0-9]"
+                maxLength={10}
+                onChange={(e) => {
+                  const { value } = e.target;
+                  if (isNaN(value)) {
+                    e.target.value = "";
+                    return;
+                  }
+                  handleChange(e);
+                }}
                 value={reference.phone}
                 className="h-[60px] px-2 bg-gray-200 border border-gray-200 rounded-lg outline-none"
               />
@@ -127,6 +164,8 @@ const ReferencesTab = () => {
               <input
                 type="text"
                 name="relationship"
+                minLength={5}
+                maxLength={25}
                 onChange={handleChange}
                 value={reference.relationship}
                 className="h-[60px] px-2 bg-gray-200 border border-gray-200 rounded-lg outline-none"
@@ -197,7 +236,7 @@ const ReferencesTab = () => {
       </div>
       <Toaster richColors position="bottom-right" />
     </main>
-  )
-}
+  );
+};
 
-export default ReferencesTab
+export default ReferencesTab;

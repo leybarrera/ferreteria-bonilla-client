@@ -1,82 +1,88 @@
-import { useEffect } from 'react'
-import { storageUtil } from '../../utils/index.utils'
-import { branchApi, jobOffersApi } from '../../api/index.api'
-import { useState } from 'react'
-import { RiCloseLine } from 'react-icons/ri'
-import { positions } from '../../data/data'
-import { toast, Toaster } from 'sonner'
+import { useEffect } from "react";
+import { storageUtil } from "../../utils/index.utils";
+import { branchApi, jobOffersApi } from "../../api/index.api";
+import { useState } from "react";
+import { RiCloseLine } from "react-icons/ri";
+import { positions } from "../../data/data";
+import { toast, Toaster } from "sonner";
 
-const NewOfferModal = ({ showModal, toggleModal }) => {
+const NewOfferModal = ({ showModal, toggleModal, setSuccess }) => {
   const initialState = {
-    BranchId: '',
-    charge: '',
-    description: '',
-    title: '',
-    salary: '',
-    requirements: '',
-    type: '',
-    contractType: '',
-    isActive: '',
-    expirationDate: '',
-  }
+    BranchId: "",
+    charge: "",
+    description: "",
+    title: "",
+    salary: "",
+    requirements: "",
+    type: "",
+    contractType: "",
+    isActive: "",
+    expirationDate: "",
+  };
 
-  const [offer, setOffer] = useState(initialState)
-  const [branches, setBranches] = useState([])
+  const [offer, setOffer] = useState(initialState);
+  const [branches, setBranches] = useState([]);
 
   const handleClose = () => {
-    toggleModal()
-  }
+    toggleModal();
+  };
 
   const handleChange = (e) => {
-    const { name, value } = e.target
+    const { name, value } = e.target;
     setOffer((prev) => ({
       ...prev,
       [name]: value,
-    }))
-  }
+    }));
+  };
 
   const handleSubmit = async (e) => {
-    const { token } = storageUtil.getData('session')
+    const { token } = storageUtil.getData("session");
 
-    e.preventDefault()
-    const { isActive, expirationDate, ...newOffer } = offer
+    e.preventDefault();
+    const { isActive, expirationDate, ...newOffer } = offer;
     const offerInfoCompleted = Object.values(newOffer).every(
-      (data) => data !== ''
-    )
+      (data) => data !== ""
+    );
 
     if (offerInfoCompleted) {
       const offer = {
         ...newOffer,
-        isActive: isActive === 'Activa' ? true : false,
+        isActive: isActive === "Activa" ? true : false,
         expirationDate: new Date(expirationDate),
-      }
+      };
 
       jobOffersApi
         .create(token, offer)
         .then((res) => {
-          const { message } = res.data
-          toast.success(message)
+          const { message } = res.data;
+          toast.success(message);
+
+          setOffer(initialState);
+          setSuccess(true);
+          setTimeout(() => {
+            toggleModal();
+          }, 1500);
         })
         .catch((err) => {
-          console.log(err)
-        })
+          console.log(err);
+        });
     }
-  }
+  };
 
   useEffect(() => {
-    const { token } = storageUtil.getData('session')
+    const { token } = storageUtil.getData("session");
 
     // Obtener topdas las sucursales
     branchApi.getAll().then((res) => {
-      const { branches } = res.data
-      console.log(branches)
-      setBranches(branches)
-    })
-  }, [])
+      const { branches } = res.data;
+      console.log(branches);
+      setBranches(branches);
+    });
+  }, []);
   return (
     <div
       className={`${
-        showModal ? 'block' : 'hidden'
+        showModal ? "block" : "hidden"
       } absolute w-full h-full bg-black/50 top-0 left-0 z-50  flex justify-center items-center
 `}
     >
@@ -110,7 +116,7 @@ const NewOfferModal = ({ showModal, toggleModal }) => {
                 onChange={handleChange}
                 className="outline-none h-[50px] bg-gray-100 rounded-lg px-2 border border-gray-300"
               >
-                <option selected={offer.BranchId === ''}>
+                <option selected={offer.BranchId === ""}>
                   Elija la sucursal
                 </option>
                 {branches.map((branch) => (
@@ -134,7 +140,7 @@ const NewOfferModal = ({ showModal, toggleModal }) => {
                 onChange={handleChange}
                 className="outline-none h-[50px] bg-gray-100 rounded-lg px-2 border border-gray-300"
               >
-                <option selected={offer.charge === ''} disabled>
+                <option selected={offer.charge === ""} disabled>
                   Elija el cargo
                 </option>
                 {positions.map((position) => (
@@ -207,19 +213,19 @@ const NewOfferModal = ({ showModal, toggleModal }) => {
                 onChange={handleChange}
                 className="outline-none h-[50px] bg-gray-100 rounded-lg px-2 border border-gray-300"
               >
-                <option selected={offer.type === ''} disabled>
+                <option selected={offer.type === ""} disabled>
                   Elija el tipo
                 </option>
-                <option value={'Remoto'} selected={offer.type === 'Remoto'}>
+                <option value={"Remoto"} selected={offer.type === "Remoto"}>
                   Remoto
                 </option>
                 <option
-                  value={'Presencial'}
-                  selected={offer.type === 'Presencial'}
+                  value={"Presencial"}
+                  selected={offer.type === "Presencial"}
                 >
                   Presencial
                 </option>
-                <option value={'Híbrido'} selected={offer.type === 'Híbrido'}>
+                <option value={"Híbrido"} selected={offer.type === "Híbrido"}>
                   Híbrido
                 </option>
               </select>
@@ -234,24 +240,24 @@ const NewOfferModal = ({ showModal, toggleModal }) => {
                 onChange={handleChange}
                 className="outline-none h-[50px] bg-gray-100 rounded-lg px-2 border border-gray-300"
               >
-                <option selected={offer.contractType === ''} disabled>
+                <option selected={offer.contractType === ""} disabled>
                   Elija el contrato
                 </option>
                 <option
-                  value={'Tiempo completo'}
-                  selected={offer.contractType === 'Tiempo completo'}
+                  value={"Tiempo completo"}
+                  selected={offer.contractType === "Tiempo completo"}
                 >
                   Tiempo completo
                 </option>
                 <option
-                  value={'Tiempo parcial'}
-                  selected={offer.contractType === 'Tiempo parcial'}
+                  value={"Tiempo parcial"}
+                  selected={offer.contractType === "Tiempo parcial"}
                 >
                   Tiempo parcial
                 </option>
                 <option
-                  value={'Contrato'}
-                  selected={offer.contractType === 'Contrato'}
+                  value={"Contrato"}
+                  selected={offer.contractType === "Contrato"}
                 >
                   Contrato
                 </option>
@@ -282,15 +288,15 @@ const NewOfferModal = ({ showModal, toggleModal }) => {
                 onChange={handleChange}
                 className="outline-none h-[50px] bg-gray-100 rounded-lg px-2 border border-gray-300"
               >
-                <option selected={offer.isActive === ''} disabled>
+                <option selected={offer.isActive === ""} disabled>
                   Elija el estado de la oferta
                 </option>
-                <option value={'Activa'} selected={offer.isActive === 'Activa'}>
+                <option value={"Activa"} selected={offer.isActive === "Activa"}>
                   Activa
                 </option>
                 <option
-                  value={'Inactiva'}
-                  selected={offer.isActive === 'Inactiva'}
+                  value={"Inactiva"}
+                  selected={offer.isActive === "Inactiva"}
                 >
                   Inactiva
                 </option>
@@ -322,7 +328,7 @@ const NewOfferModal = ({ showModal, toggleModal }) => {
       </div>
       <Toaster richColors position="bottom-right" />
     </div>
-  )
-}
+  );
+};
 
-export default NewOfferModal
+export default NewOfferModal;

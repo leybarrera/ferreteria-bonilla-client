@@ -1,68 +1,78 @@
-import { useState } from 'react'
-import { RiCamera3Fill, RiLoader4Fill, RiSave2Line } from 'react-icons/ri'
-import { useSelector } from 'react-redux'
-import { toast, Toaster } from 'sonner'
-import { userApi } from '../../api/index.api'
-import { AxiosError } from 'axios'
-import { storageUtil } from '../../utils/index.utils'
+import { useState } from "react";
+import { RiCamera3Fill, RiLoader4Fill, RiSave2Line } from "react-icons/ri";
+import { useSelector } from "react-redux";
+import { toast, Toaster } from "sonner";
+import { userApi } from "../../api/index.api";
+import { AxiosError } from "axios";
+import { storageUtil, validatorUtils } from "../../utils/index.utils";
 
 const GeneralInfo = () => {
-  const [data, setData] = useState({})
-  const [updating, setUpdating] = useState(false)
-  const { info } = useSelector((state) => state.user)
+  const [data, setData] = useState({});
+  const [updating, setUpdating] = useState(false);
+  const { info } = useSelector((state) => state.user);
 
-  const [image, setImage] = useState(null)
-  const [imageUri, setImageUri] = useState(null)
+  const [image, setImage] = useState(null);
+  const [imageUri, setImageUri] = useState(null);
 
   const handleChange = (e) => {
-    const { name, value } = e.target
+    const { name, value } = e.target;
     setData((prev) => ({
       ...prev,
       [name]: value,
-    }))
-  }
+    }));
+  };
 
   const handleImageChange = (e) => {
-    const file = e.target.files[0]
+    const file = e.target.files[0];
     if (file) {
-      const uri = URL.createObjectURL(file)
-      setImageUri(uri)
-      setImage(file)
+      const uri = URL.createObjectURL(file);
+      setImageUri(uri);
+      setImage(file);
     }
-  }
+  };
 
   const handleSubmit = () => {
-    const formData = new FormData()
+    const formData = new FormData();
 
     if (Object.keys(data).length === 0 && image === null) {
-      toast.error('No hay datos para actualizar')
-      return
+      toast.error("No hay datos para actualizar");
+      return;
+    }
+
+    if (data.dni && !validatorUtils.isValidDNI(data.dni.toString())) {
+      toast.error("DNI no valido");
+      return;
+    }
+
+    if (data.phone && !validatorUtils.isValidPhone(data.phone.toString())) {
+      toast.error("Teléfono no válido");
+      return;
     }
 
     Object.keys(data).forEach((key) => {
-      formData.append(key, data[key])
-    })
+      formData.append(key, data[key]);
+    });
 
     if (image) {
-      formData.append('profilePicture', image)
+      formData.append("profilePicture", image);
       userApi
         .updateWithImage(formData, info.id)
         .then((res) => {
-          const { message, user } = res.data
-          storageUtil.updateData('session', user)
-          toast.success(message)
+          const { message, user } = res.data;
+          storageUtil.updateData("session", user);
+          toast.success(message);
         })
         .catch((err) => {
           if (err instanceof AxiosError) {
-            const { message } = err.response.data
-            toast.error(message)
+            const { message } = err.response.data;
+            toast.error(message);
           } else {
-            toast.error('Error desconocido. Intente más tarde.')
+            toast.error("Error desconocido. Intente más tarde.");
           }
         })
         .finally(() => {
-          setData({})
-        })
+          setData({});
+        });
       // Actualizar con imaagen
     } else {
       // Actualizar sin imagen
@@ -70,30 +80,30 @@ const GeneralInfo = () => {
       userApi
         .updateWithoutImage(formData, info.id)
         .then((res) => {
-          const { message, user } = res.data
-          storageUtil.updateData('session', user)
-          toast.success(message)
+          const { message, user } = res.data;
+          storageUtil.updateData("session", user);
+          toast.success(message);
         })
         .catch((err) => {
           if (err instanceof AxiosError) {
-            const { message } = err.response.data
-            toast.error(message)
+            const { message } = err.response.data;
+            toast.error(message);
           } else {
-            toast.error('Error desconocido. Intente más tarde.')
+            toast.error("Error desconocido. Intente más tarde.");
           }
         })
         .finally(() => {
-          setData({})
-        })
+          setData({});
+        });
     }
-  }
+  };
 
   return (
     <main className="w-[800px] py-5 flex flex-col lg:px-0 ">
       {/* Imagen de perfil */}
       <div className="w-[150px] h-[150px] rounded-full border-4 border-[#fd6c01] relative">
         <img
-          src={imageUri || info?.profilePicture || '/user.png'}
+          src={imageUri || info?.profilePicture || "/user.png"}
           alt="Imagen de perfil del usuario"
           className="w-full h-full object-cover rounded-full"
         />
@@ -124,6 +134,7 @@ const GeneralInfo = () => {
               type="text"
               name="fullName"
               value={info?.fullName}
+              disabled
               onChange={handleChange}
               className="w-full h-[50px] bg-gray-200 border border-gray-200 rounded-lg outline-none px-5"
             />
@@ -146,15 +157,16 @@ const GeneralInfo = () => {
             <input
               type="text"
               pattern="[0-9]"
+              maxLength={10}
               name="dni"
               value={info?.dni}
               onChange={(e) => {
-                const { value } = e.target
+                const { value } = e.target;
                 if (isNaN(value)) {
-                  e.target.value = ''
-                  return
+                  e.target.value = "";
+                  return;
                 }
-                handleChange(e)
+                handleChange(e);
               }}
               disabled={info?.dni !== null}
               className="w-full h-[50px] bg-gray-200 border border-gray-200 rounded-lg outline-none px-5 disabled:bg-gray-300"
@@ -167,13 +179,14 @@ const GeneralInfo = () => {
               name="phone"
               value={info?.phone}
               pattern="[0-9]"
+              maxLength={10}
               onChange={(e) => {
-                const { value } = e.target
+                const { value } = e.target;
                 if (isNaN(value)) {
-                  e.target.value = ''
-                  return
+                  e.target.value = "";
+                  return;
                 }
-                handleChange(e)
+                handleChange(e);
               }}
               className="w-full h-[50px] bg-gray-200 border border-gray-200 rounded-lg outline-none px-5"
             />
@@ -191,13 +204,13 @@ const GeneralInfo = () => {
               <option selected={!info?.gender} disabled>
                 Elije tu género
               </option>
-              <option value="Masculino" selected={info?.gender === 'Masculino'}>
+              <option value="Masculino" selected={info?.gender === "Masculino"}>
                 Masculino
               </option>
-              <option value="Femenino" selected={info?.gender === 'Femenino'}>
+              <option value="Femenino" selected={info?.gender === "Femenino"}>
                 Femenino
               </option>
-              <option value="Otro" selected={info?.gender === 'Otro'}>
+              <option value="Otro" selected={info?.gender === "Otro"}>
                 Otro
               </option>
             </select>
@@ -235,7 +248,7 @@ const GeneralInfo = () => {
 
       <Toaster richColors position="bottom-right" />
     </main>
-  )
-}
+  );
+};
 
-export default GeneralInfo
+export default GeneralInfo;
