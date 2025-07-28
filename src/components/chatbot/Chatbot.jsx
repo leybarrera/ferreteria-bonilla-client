@@ -1,34 +1,34 @@
-import React, { useState, useRef, useEffect } from 'react'
-import { GrClose } from 'react-icons/gr'
-import { MdOutlineKeyboardArrowDown } from 'react-icons/md'
-import { TbMessageChatbot } from 'react-icons/tb'
-import { responses, rules } from '../../data/data'
-import { useLocation } from 'react-router-dom'
+import React, { useState, useRef, useEffect } from "react";
+import { GrClose } from "react-icons/gr";
+import { MdOutlineKeyboardArrowDown } from "react-icons/md";
+import { TbMessageChatbot } from "react-icons/tb";
+import { responses, rules } from "../../data/data";
+import { useLocation } from "react-router-dom";
 
 const Chatbot = () => {
-  const location = useLocation()
-  const [showInput, setShowInput] = useState(false)
-  const [question, setQuestion] = useState('')
-  const messagesEndRef = useRef(null) // Aquí se hace referencia al contenedor de los mensajes
-  const toggleShowInput = () => setShowInput((prev) => !prev)
+  const location = useLocation();
+  const [showInput, setShowInput] = useState(false);
+  const [question, setQuestion] = useState("");
+  const messagesEndRef = useRef(null); // Aquí se hace referencia al contenedor de los mensajes
+  const toggleShowInput = () => setShowInput((prev) => !prev);
 
   const [messages, setMessages] = useState([
     {
-      type: 'system',
-      text: 'Hola Cristhian, ¿En qué puedo ayudarte el día de hoy?',
+      type: "system",
+      text: "Hola, ¿En qué puedo ayudarte el día de hoy?",
     },
-  ])
+  ]);
 
   const normalizedText = (text) => {
     return text
       .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .trim()
-  }
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .trim();
+  };
 
   const responseToUser = (question) => {
-    const normalizedInput = normalizedText(question)
+    const normalizedInput = normalizedText(question);
 
     for (const [key, synonyms] of Object.entries(rules)) {
       if (
@@ -36,65 +36,68 @@ const Chatbot = () => {
           normalizedInput.includes(normalizedText(synonym))
         )
       ) {
-        const arrResponse = responses[key]
+        const arrResponse = responses[key];
         const response =
-          arrResponse[Math.floor(Math.random() * arrResponse.length)]
+          arrResponse[Math.floor(Math.random() * arrResponse.length)];
         setMessages((prev) => [
           ...prev,
           {
-            type: 'system',
+            type: "system",
             text: response,
           },
-        ])
+        ]);
       }
     }
-  }
+  };
 
   const handleChange = (e) => {
-    const { value } = e.target
-    setQuestion(value)
-  }
+    const { value } = e.target;
+    setQuestion(value);
+  };
 
   const handleSendMessage = () => {
-    const auxQuestion = question
+    const auxQuestion = question;
     setMessages((prev) => [
       ...prev,
       {
-        type: 'user',
+        type: "user",
         text: question,
       },
-    ])
+    ]);
 
-    setQuestion('')
+    setQuestion("");
     setTimeout(() => {
-      responseToUser(auxQuestion)
-    }, 1500)
-  }
+      responseToUser(auxQuestion);
+    }, 1500);
+  };
 
   // Aquí se asegura que el scroll siempre se desplace hacia abajo al agregar un mensaje
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
-  }, [messages])
+    messagesEndRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "end",
+    });
+  }, [messages]);
 
   const renderMessage = (text) => {
-    return text.split('\n').map((line, index) => (
+    return text.split("\n").map((line, index) => (
       <span key={index}>
         {line}
         <br />
       </span>
-    ))
-  }
+    ));
+  };
 
   useEffect(() => {
-    console.log(location)
-  }, [showInput])
+    console.log(location);
+  }, [showInput]);
 
   return (
     <>
       {/* Chatbot */}
       <div
         className={`lg:w-[400px] lg:h-[600px] h-full w-full bg-white fixed lg:bottom-24 not-lg:top-0 lg:right-14 not-lg:left-0 z-50 rounded-xl border border-gray-300 flex flex-col overflow-hidden ${
-          showInput ? 'block' : 'hidden'
+          showInput ? "block" : "hidden"
         } transition-all duration-300`}
       >
         {/* Header */}
@@ -114,7 +117,7 @@ const Chatbot = () => {
           {/* Contenedor del chat (con scroll automático hacia abajo) */}
           <div className="overflow-y-auto flex-1 px-3 flex flex-col gap-5">
             {messages.map((msg, index) => {
-              return msg.type === 'system' ? (
+              return msg.type === "system" ? (
                 <div
                   key={index}
                   className="flex flex-row gap-3 items-center justify-start"
@@ -135,7 +138,7 @@ const Chatbot = () => {
                     <span>{msg.text}</span>
                   </div>
                 </div>
-              )
+              );
             })}
             {/* Este es el contenedor de referencia para hacer scroll hacia abajo */}
             <div ref={messagesEndRef} />
@@ -152,28 +155,28 @@ const Chatbot = () => {
               placeholder="Escribe tutorial para guiarte"
               onChange={handleChange}
               onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  if (question.trim() === 'tutorial') {
+                if (e.key === "Enter") {
+                  if (question.trim() === "tutorial") {
                     const auxQuestion = `tutorial - ${
-                      location.pathname === '/'
-                        ? 'home'
-                        : location.pathname.split('/')[1]
-                    }`
+                      location.pathname === "/"
+                        ? "home"
+                        : location.pathname.split("/")[1]
+                    }`;
 
                     setMessages((prev) => [
                       ...prev,
                       {
-                        type: 'user',
+                        type: "user",
                         text: question,
                       },
-                    ])
+                    ]);
 
-                    setQuestion('')
+                    setQuestion("");
                     setTimeout(() => {
-                      responseToUser(auxQuestion)
-                    }, 1500)
+                      responseToUser(auxQuestion);
+                    }, 1500);
                   } else {
-                    handleSendMessage()
+                    handleSendMessage();
                   }
                 }
               }}
@@ -195,7 +198,7 @@ const Chatbot = () => {
         )}
       </button>
     </>
-  )
-}
+  );
+};
 
-export default Chatbot
+export default Chatbot;

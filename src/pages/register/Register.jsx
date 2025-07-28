@@ -146,8 +146,8 @@ const Register = () => {
       <main className="w-full h-full flex flex-row py-10">
         <section className="flex- w-[1200px] mx-auto md:[400px] px-5 flex flex-col  items-center ">
           <div className="flex flex-col gap-2 justify-center items-center">
-            <img src="/public/mascota.png" alt="" className="w-32 h-32" />
-            <img src="/public/encabezado.png" alt="" />
+            <img src="/mascota.png" alt="" className="w-32 h-32" />
+            <img src="/encabezado.png" alt="" />
           </div>
           <form
             action=""

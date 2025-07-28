@@ -67,7 +67,7 @@ const Notifications = () => {
           >
             <div className="relative w-[50px] h-[50px] rounded-full bg-[#fd6c01] flex justify-center items-center">
               <img
-                src="/public/mascota-clean.png"
+                src="/mascota-clean.png"
                 alt=""
                 className="w-[40px]  object-cover rounded-full"
               />

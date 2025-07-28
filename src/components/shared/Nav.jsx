@@ -194,7 +194,7 @@ const Nav = ({ toggleShow }) => {
         <div className="flex flex-row items-center lg:gap-3 gap-1">
           <NavLink to={"/"}>
             <img
-              src={"/public/mascota-clean.png"}
+              src={"/mascota-clean.png"}
               className="w-[45px]"
               alt="Logo Ferretería BOnilla"
             />

@@ -46,7 +46,7 @@ const Notifications = ({ showNotifications, toggleShowNotifications }) => {
       >
         {/* Foto de perfil */}
         <img
-          src="/public/mascota-clean.png"
+          src="/mascota-clean.png"
           alt="Foto de perfil del usuario"
           className="w-[56px] h-[56px] rounded-full"
         />
@@ -80,7 +80,7 @@ const Notifications = ({ showNotifications, toggleShowNotifications }) => {
       >
         {/* Foto de perfil */}
         <img
-          src="/public/mascota-clean.png"
+          src="/mascota-clean.png"
           alt="Foto de perfil del usuario"
           className="w-[56px] h-[56px] rounded-full"
         />

@@ -1,6 +1,6 @@
-import { useEffect } from 'react'
-import { IoQrCode } from 'react-icons/io5'
-import { useParams } from 'react-router-dom'
+import { useEffect } from "react";
+import { IoQrCode } from "react-icons/io5";
+import { useParams } from "react-router-dom";
 import {
   General,
   References,
@@ -10,41 +10,41 @@ import {
   WorkExperience,
   Languages,
   QRComponent,
-} from '../../components/index.components'
-import { useSelector } from 'react-redux'
-import { useState } from 'react'
-import { Loading } from '../index.pages'
-import { userApi } from '../../api/index.api'
-import { AxiosError } from 'axios'
-import { toast, Toaster } from 'sonner'
-import { PiEmptyBold } from 'react-icons/pi'
+} from "../../components/index.components";
+import { useSelector } from "react-redux";
+import { useState } from "react";
+import { Loading } from "../index.pages";
+import { userApi } from "../../api/index.api";
+import { AxiosError } from "axios";
+import { toast, Toaster } from "sonner";
+import { PiEmptyBold } from "react-icons/pi";
 
 const Profile = () => {
-  const [showQR, setShowQR] = useState(false)
+  const [showQR, setShowQR] = useState(false);
 
-  const { id } = useParams()
-  const { info } = useSelector((state) => state.user)
-  const [infoUser, setInfoUser] = useState(null)
-  const [about, setAbout] = useState(null)
-  const [userSkills, setUserSkills] = useState([])
-  const [userEducations, setUserEducations] = useState([])
-  const [userLanguages, setUserLanguages] = useState([])
-  const [userReferences, setUserReferences] = useState([])
-  const [userExperiences, setuserExperiences] = useState([])
+  const { id } = useParams();
+  const { info } = useSelector((state) => state.user);
+  const [infoUser, setInfoUser] = useState(null);
+  const [about, setAbout] = useState(null);
+  const [userSkills, setUserSkills] = useState([]);
+  const [userEducations, setUserEducations] = useState([]);
+  const [userLanguages, setUserLanguages] = useState([]);
+  const [userReferences, setUserReferences] = useState([]);
+  const [userExperiences, setuserExperiences] = useState([]);
 
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(true);
 
   const toggleShowQR = () => {
-    setShowQR((prev) => !prev)
-  }
+    setShowQR((prev) => !prev);
+  };
 
   const getAllUserData = async () => {
     // Get Data User
     userApi
       .getById(id)
       .then((res) => {
-        const { user } = res.data
-        console.log(user)
+        const { user } = res.data;
+        console.log(user);
         const {
           About,
           UserSkills,
@@ -52,33 +52,33 @@ const Profile = () => {
           UserExperiences,
           UserReferences,
           UserLanguages,
-        } = user
+        } = user;
 
-        setInfoUser(user)
-        setUserSkills(UserSkills)
-        setUserEducations(UserEducations)
-        setuserExperiences(UserExperiences)
-        setUserReferences(UserReferences)
-        setUserLanguages(UserLanguages)
-        setAbout(About)
+        setInfoUser(user);
+        setUserSkills(UserSkills);
+        setUserEducations(UserEducations);
+        setuserExperiences(UserExperiences);
+        setUserReferences(UserReferences);
+        setUserLanguages(UserLanguages);
+        setAbout(About);
       })
       .catch((err) => {
         if (err instanceof AxiosError) {
-          console.log(err)
-          toast.error(err.response.data.message)
+          console.log(err);
+          toast.error(err.response.data.message);
         } else {
-          toast.error('Error desconocido. Intente más tarde.')
+          toast.error("Error desconocido. Intente más tarde.");
         }
       })
-      .finally(() => setLoading(false))
-  }
+      .finally(() => setLoading(false));
+  };
 
   useEffect(() => {
-    getAllUserData()
-  }, [])
+    getAllUserData();
+  }, []);
 
   if (loading) {
-    return <Loading />
+    return <Loading />;
   }
 
   return !infoUser && !loading ? (
@@ -95,14 +95,14 @@ const Profile = () => {
         {/* Portada */}
         <div className="w-full lg:h-[450px] h-[250px] lg:rounded-bl-xl lg:rounded-br-xl relative">
           <img
-            src="/public/portada.jpg"
+            src="/portada.jpg"
             alt="Portada"
             className="absolute w-full h-full object-cover lg:rounded-bl-xl lg:rounded-br-xl"
           />
 
           {/* Imagen de perfil */}
           <img
-            src={infoUser?.profilePicture || '/user.png'}
+            src={infoUser?.profilePicture || "/user.png"}
             alt="Imagen de perfil del usuario"
             className="lg:w-[200px] lg:h-[200px] w-[100px] h-[100px] rounded-full z-10 absolute left-1/2 transform not-lg:-translate-x-1/2 lg:left-8 lg:-bottom-24 -bottom-10 border-3 border-gray-700"
           />
@@ -155,7 +155,7 @@ const Profile = () => {
 
       <Toaster richColors position="bottom-right" />
     </main>
-  )
-}
+  );
+};
 
-export default Profile
+export default Profile;

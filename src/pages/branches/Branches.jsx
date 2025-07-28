@@ -1,70 +1,70 @@
-import { useEffect } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
-import { storageUtil } from '../../utils/index.utils'
-import { branchApi, interestApi, jobOffersApi } from '../../api/index.api'
-import { useState } from 'react'
-import { useSelector } from 'react-redux'
-import { FaMinus, FaPlus } from 'react-icons/fa'
+import { useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { storageUtil } from "../../utils/index.utils";
+import { branchApi, interestApi, jobOffersApi } from "../../api/index.api";
+import { useState } from "react";
+import { useSelector } from "react-redux";
+import { FaMinus, FaPlus } from "react-icons/fa";
 
 const Branches = () => {
-  const { info } = useSelector((state) => state.user)
-  const { id } = useParams()
-  const [isFollowBranch, setIsFollowBranch] = useState(false)
-  const [branches, setBranches] = useState([])
-  const [branch, setBranch] = useState(null)
-  const [jobOffers, setJobOffers] = useState([])
-  const [interests, setInterests] = useState([])
-  const navigate = useNavigate()
+  const { info } = useSelector((state) => state.user);
+  const { id } = useParams();
+  const [isFollowBranch, setIsFollowBranch] = useState(false);
+  const [branches, setBranches] = useState([]);
+  const [branch, setBranch] = useState(null);
+  const [jobOffers, setJobOffers] = useState([]);
+  const [interests, setInterests] = useState([]);
+  const navigate = useNavigate();
 
   const viewBranch = (id) => {
-    navigate(`/branches/${id}`)
-  }
+    navigate(`/branches/${id}`);
+  };
 
   const getAllBranches = async () => {
     branchApi.getAll().then((res) => {
-      const { branches } = res.data
-      setBranches(branches)
-    })
-  }
+      const { branches } = res.data;
+      setBranches(branches);
+    });
+  };
 
   const getBranchById = async () => {
-    const { token } = storageUtil.getData('session')
+    const { token } = storageUtil.getData("session");
 
     branchApi.getById(token, id).then((res) => {
-      const { branch } = res.data
-      setBranch(branch)
-    })
+      const { branch } = res.data;
+      setBranch(branch);
+    });
 
     jobOffersApi.geByBranchId(token, id).then((res) => {
-      const { jobOffers } = res.data
-      setJobOffers(jobOffers)
-    })
+      const { jobOffers } = res.data;
+      setJobOffers(jobOffers);
+    });
 
-    const isFollowing = interests.some((interest) => interest.BranchId === id)
-    setIsFollowBranch(isFollowing)
-  }
+    const isFollowing = interests.some((interest) => interest.BranchId === id);
+    setIsFollowBranch(isFollowing);
+  };
 
   useEffect(() => {
-    const { token } = storageUtil.getData('session')
+    const { token } = storageUtil.getData("session");
 
     if (id) {
-      getBranchById()
+      getBranchById();
     } else {
-      getAllBranches()
+      getAllBranches();
     }
 
     interestApi.getByUserId(token, info.id).then((res) => {
-      const { interests } = res.data
-      setInterests(interests)
-    })
-  }, [id])
+      const { interests } = res.data;
+      setInterests(interests);
+    });
+  }, [id]);
   return branch ? (
     <div className="lg:w-[1400px] mx-auto w-full flex flex-col py-10 lg:px-0 px-10 gap-5 h-full bg-[#F4F2EE]">
       <header className="w-full  flex flex-col border-b border-gray-300 pb-5">
         {/* Portada */}
         <div className="w-full lg:h-[450px] h-[250px] lg:rounded-bl-xl lg:rounded-br-xl relative">
           <img
-            src="/public/portada.jpg"
+            src="/portada.jpg"
             alt="Portada"
             className="absolute w-full h-full object-cover lg:rounded-bl-xl lg:rounded-br-xl"
           />
@@ -192,11 +192,11 @@ const Branches = () => {
                     <span
                       className={`absolute top-2 right-3 rounded-full px-3 py-1 text-xs ${
                         jobOffer.isActive
-                          ? 'bg-green-400 text-white'
-                          : 'bg-red-700 text-white'
+                          ? "bg-green-400 text-white"
+                          : "bg-red-700 text-white"
                       }`}
                     >
-                      {jobOffer.isActive ? 'Activa' : 'Inactiva'}
+                      {jobOffer.isActive ? "Activa" : "Inactiva"}
                     </span>
                     <h2 className="text-sm font-semibold text-wrap text-center ">
                       Lorem ipsum dolor sit, amet consectetur adipisicing elit.
@@ -236,7 +236,7 @@ const Branches = () => {
           branches.map((br) => {
             const isFollowing = interests.find(
               (i) => i.BranchId === br.id && i.UserId === info.id
-            )
+            );
             return (
               <button
                 className="lg:w-[400px] h-fit w-full border border-gray-200 rounded-lg bg-white flex flex-col justify-center items-center py-10 px-5 hover:scale-110 transition-all duration-300 cursor-pointer"
@@ -272,7 +272,7 @@ const Branches = () => {
                   </button>
                 )}
               </button>
-            )
+            );
           })
         ) : (
           <div>
@@ -281,7 +281,7 @@ const Branches = () => {
         )}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Branches
+export default Branches;

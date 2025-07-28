@@ -255,7 +255,7 @@ const Home = () => {
         {/* header */}
         <div className="relative w-full lg:h-[58px] md:h-[150px] h-[80px]">
           <img
-            src="/public/portada.jpg"
+            src="/portada.jpg"
             alt=""
             className="absolute w-full h-full object-cover"
           />
